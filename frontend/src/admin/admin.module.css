@@ -69,7 +69,9 @@
   text-decoration: none;
   font-size: 0.9rem;
 }
-.link:hover { text-decoration: underline; }
+.link:hover {
+  text-decoration: underline;
+}
 
 .error {
   color: #ff6b6b;
@@ -109,8 +111,23 @@
   outline: none;
   margin-bottom: 0.5rem;
 }
-.input:focus { border-color: #7c6fff; }
+.input:focus {
+  border-color: #7c6fff;
+}
 
+.inputFlex {
+  width: 100%;
+  background: #111118;
+  border: 1px solid #2e2e40;
+  border-radius: 8px;
+  padding: 0.55rem 0.6rem;
+  color: #f0f0f5;
+  font-size: 0.9rem;
+  outline: none;
+}
+.inputFlex:focus {
+  border-color: #7c6fff;
+}
 
 .inputScore {
   width: 5rem;
@@ -123,7 +140,9 @@
   outline: none;
   text-align: center;
 }
-.inputScore:focus { border-color: #7c6fff; }
+.inputScore:focus {
+  border-color: #7c6fff;
+}
 
 .textarea {
   width: 100%;
@@ -138,7 +157,9 @@
   font-family: inherit;
   margin-bottom: 0.5rem;
 }
-.textarea:focus { border-color: #7c6fff; }
+.textarea:focus {
+  border-color: #7c6fff;
+}
 
 /* ─── Buttons ────────────────────────────────────────────────────────────── */
 .btnGroup {
@@ -158,8 +179,13 @@
   font-weight: 600;
   cursor: pointer;
 }
-.btnPrimary:hover { background: #6a5de8; }
-.btnPrimary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btnPrimary:hover {
+  background: #6a5de8;
+}
+.btnPrimary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .btnSecondary {
   background: transparent;
@@ -170,7 +196,10 @@
   font-size: 0.9rem;
   cursor: pointer;
 }
-.btnSecondary:hover { border-color: #7c6fff; color: #f0f0f5; }
+.btnSecondary:hover {
+  border-color: #7c6fff;
+  color: #f0f0f5;
+}
 
 .btnDanger {
   background: transparent;
@@ -181,8 +210,13 @@
   font-size: 0.9rem;
   cursor: pointer;
 }
-.btnDanger:hover { background: #ff6b6b22; }
-.btnDanger:disabled { opacity: 0.5; cursor: not-allowed; }
+.btnDanger:hover {
+  background: #ff6b6b22;
+}
+.btnDanger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .btnGhost {
   background: transparent;
@@ -194,7 +228,9 @@
   cursor: pointer;
   width: 100%;
 }
-.btnGhost:hover { background: #7c6fff11; }
+.btnGhost:hover {
+  background: #7c6fff11;
+}
 
 .btnIcon {
   background: transparent;
@@ -330,9 +366,18 @@
   font-weight: 700;
   letter-spacing: 0.05em;
 }
-.statusBadge[data-status="waiting"] { background: #2e2e40; color: #888; }
-.statusBadge[data-status="active"]  { background: #1a3a1a; color: #4caf50; }
-.statusBadge[data-status="finished"]{ background: #2e1a1a; color: #ff6b6b; }
+.statusBadge[data-status="waiting"] {
+  background: #2e2e40;
+  color: #888;
+}
+.statusBadge[data-status="active"] {
+  background: #1a3a1a;
+  color: #4caf50;
+}
+.statusBadge[data-status="finished"] {
+  background: #2e1a1a;
+  color: #ff6b6b;
+}
 
 .controlBar {
   display: flex;
@@ -356,8 +401,13 @@
   font-weight: 700;
   cursor: pointer;
 }
-.btnStart:hover { background: #43a047; }
-.btnStart:disabled { opacity: 0.5; cursor: not-allowed; }
+.btnStart:hover {
+  background: #43a047;
+}
+.btnStart:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .btnControl {
   background: #2e2e40;
@@ -369,8 +419,13 @@
   font-weight: 600;
   cursor: pointer;
 }
-.btnControl:hover:not(:disabled) { background: #3a3a55; }
-.btnControl:disabled { opacity: 0.4; cursor: not-allowed; }
+.btnControl:hover:not(:disabled) {
+  background: #3a3a55;
+}
+.btnControl:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 .storyCounter {
   font-size: 1rem;
@@ -444,7 +499,10 @@
   text-align: right;
   flex-shrink: 0;
 }
-.voteBarStat span { color: #666; font-weight: 400; }
+.voteBarStat span {
+  color: #666;
+  font-weight: 400;
+}
 
 /* ─── Top Nav ────────────────────────────────────────────────────────────── */
 .topNav {
@@ -477,7 +535,9 @@
   font-size: 0.85rem;
   font-weight: 500;
 }
-.topNavLink:hover { color: #f0f0f5; }
+.topNavLink:hover {
+  color: #f0f0f5;
+}
 
 .topNavEventId {
   font-size: 0.75rem;
@@ -498,7 +558,10 @@
   font-size: 0.8rem;
   cursor: pointer;
 }
-.btnLogout:hover { color: #ff6b6b; border-color: #ff6b6b55; }
+.btnLogout:hover {
+  color: #ff6b6b;
+  border-color: #ff6b6b55;
+}
 
 /* ─── Recent Events (Login page) ─────────────────────────────────────────── */
 .recentEvents {
@@ -526,7 +589,9 @@
   cursor: pointer;
   text-align: left;
 }
-.recentEventBtn:hover { border-color: #7c6fff; }
+.recentEventBtn:hover {
+  border-color: #7c6fff;
+}
 
 .recentEventId {
   font-family: monospace;
@@ -608,7 +673,6 @@
   flex-shrink: 0;
 }
 
-
 /* ─── Share Link ─────────────────────────────────────────────────────────── */
 .shareSection {
   margin-top: 1.5rem;
@@ -656,5 +720,11 @@
   cursor: pointer;
   transition: background 0.15s;
 }
-.btnCopy:hover { background: #3a2f58; }
-.btnCopied { background: #1a3a1a; color: #6adb6a; border-color: #6adb6a44; }
+.btnCopy:hover {
+  background: #3a2f58;
+}
+.btnCopied {
+  background: #1a3a1a;
+  color: #6adb6a;
+  border-color: #6adb6a44;
+}

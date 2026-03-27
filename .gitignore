@@ -1,11 +1,11 @@
 # Dependencies
-node_modules/
-frontend/node_modules/
-functions/node_modules/
+node_modules
+frontend/node_modules
+functions/node_modules
 
 # Build output
-frontend/dist/
-frontend/.vite/
+frontend/dist
+frontend/.vite
 
 # Environment
 .env
@@ -13,7 +13,7 @@ frontend/.vite/
 !.env.example
 
 # AWS / Serverless
-.serverless/
+.serverless
 samconfig.toml
 
 # OS
@@ -21,6 +21,6 @@ samconfig.toml
 Thumbs.db
 
 # Editor
-.vscode/
-.idea/
+.vscode
+.idea
 *.swp

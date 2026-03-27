@@ -1,0 +1,66 @@
+service: plotcast
+
+frameworkVersion: '4'
+
+provider:
+  name: aws
+  runtime: nodejs22.x
+  region: ap-southeast-1  # change to your preferred region
+  environment:
+    TABLE_NAME: PlotCastTable
+    JWT_SECRET: ${env:JWT_SECRET, 'change-this-secret-before-deploy'}
+    JWT_EXPIRY: '14400'
+    ADMIN_PASSWORD: ${env:ADMIN_PASSWORD, '12345678'}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Query
+            - dynamodb:BatchWriteItem
+          Resource:
+            - !GetAtt PlotCastTable.Arn
+
+package:
+  patterns:
+    - '!frontend/**'
+    - '!.git/**'
+    - '!*.md'
+    - '!*.toml'
+
+functions:
+
+  # Single Hono app handles all routes
+  api:
+    handler: functions/handler.handler
+    events:
+      - http:
+          path: /
+          method: ANY
+      - http:
+          path: /{proxy+}
+          method: ANY
+
+# ── Infrastructure ─────────────────────────────────────────────────────────────
+
+resources:
+  Resources:
+    PlotCastTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: PlotCastTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE

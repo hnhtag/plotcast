@@ -1,0 +1,14 @@
+{
+  "name": "plotcast-functions",
+  "version": "1.0.0",
+  "description": "PlotCast Lambda functions",
+  "type": "commonjs",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/lib-dynamodb": "^3.0.0",
+    "bcryptjs": "^2.4.3",
+    "hono": "^4.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "nanoid": "^3.3.7"
+  }
+}

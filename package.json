@@ -2,13 +2,8 @@
   "name": "plotcast",
   "version": "1.0.0",
   "private": true,
-  "config": {
-    "awsProfile": "default",
-    "s3Bucket": "YOUR_S3_BUCKET_NAME",
-    "cfDistId": "YOUR_CLOUDFRONT_DISTRIBUTION_ID"
-  },
   "scripts": {
     "deploy:backend": "cd functions && npm install && cd .. && serverless deploy --aws-profile default",
-    "deploy:frontend": "cd frontend && npm install && npm run build && cd .. && aws s3 sync frontend/dist s3://$npm_package_config_s3Bucket --delete --profile $npm_package_config_awsProfile && aws cloudfront create-invalidation --distribution-id $npm_package_config_cfDistId --paths \"/*\" --profile $npm_package_config_awsProfile"
+    "deploy:frontend": "cd frontend && npm install && npm run build && cd .. && aws s3 sync frontend/dist s3://plotcast-dev --delete --profile default && aws cloudfront create-invalidation --distribution-id E1JX2KQV6S3DUG --paths \"/*\" --profile default"
   }
 }

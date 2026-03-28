@@ -11,6 +11,7 @@ const leaderboard = require('./leaderboard/leaderboard');
 // Admin — no auth
 const createEvent = require('./admin/createEvent');
 const login = require('./admin/login');
+const listEvents = require('./admin/listEvents');
 
 // Admin — auth required
 const changePassword = require('./admin/changePassword');
@@ -56,6 +57,7 @@ app.delete('/admin/delete-story', adminAuth, deleteStory);
 app.post('/admin/create-character', adminAuth, createCharacter);
 app.put('/admin/update-character', adminAuth, updateCharacter);
 app.delete('/admin/delete-character', adminAuth, deleteCharacter);
+app.get('/admin/events', adminAuth, listEvents);
 app.get('/admin/event/:eventId', adminAuth, getEvent);
 app.post('/admin/start', adminAuth, start);
 app.post('/admin/next', adminAuth, next);

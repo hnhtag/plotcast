@@ -139,49 +139,6 @@
   flex-wrap: wrap;
 }
 
-.answerStateBadge {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  border-radius: 999px;
-  padding: 0.28rem 0.6rem;
-  border: 1px solid #4d4d63;
-  color: #b5b5c8;
-  background: #141420;
-}
-
-.answerStateBadge[data-open="true"] {
-  color: #7effb3;
-  border-color: #2e7d4f;
-  background: #112218;
-}
-
-.answerTimer {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #f7f3ff;
-  background: linear-gradient(90deg, #7c6fff33, #a78bfa2b);
-  border: 1px solid #8e7cff;
-  border-radius: 999px;
-  padding: 0.28rem 0.62rem;
-  box-shadow: 0 0 0 1px #00000040 inset, 0 0 14px #7c6fff44;
-  animation: answer-timer-pulse 1.6s ease-in-out infinite;
-}
-
-@keyframes answer-timer-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 1px #00000040 inset, 0 0 10px #7c6fff33;
-  }
-  50% {
-    box-shadow: 0 0 0 1px #00000040 inset, 0 0 18px #a78bfa80;
-  }
-}
-
 .storyLockedNote {
   background: #141420;
   border: 1px dashed #35354d;

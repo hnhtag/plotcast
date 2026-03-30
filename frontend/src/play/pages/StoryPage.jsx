@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getEventState, getPlayerState, submitVote } from '../../services/api.js';
 import { usePlay } from '../PlayContext.jsx';
 import { useInterval } from '../../hooks/useInterval.js';
+import AnswerPhaseChip from '../../components/AnswerPhaseChip.jsx';
 import OptionCard from '../components/OptionCard.jsx';
 import ScoreMeter from '../components/ScoreMeter.jsx';
 import styles from '../play.module.css';
@@ -133,6 +134,7 @@ export default function StoryPage() {
   const answersOpenByState = Boolean(state.answersOpen);
   const timedOpen = Number.isFinite(timerLeftSec) ? timerLeftSec > 0 : true;
   const answersOpen = answersOpenByState && timedOpen;
+  const configuredTimerSec = Number.isFinite(state.answerTimerSec) ? state.answerTimerSec : 0;
   // Simple max score: just show current score since we may not have all stories loaded
   const maxScore = state.totalStories * 30; // rough estimate; fine for MVP
 
@@ -147,12 +149,12 @@ export default function StoryPage() {
       <p className={styles.storyBody}>{story.story}</p>
 
       <div className={styles.answerStateRow}>
-        <span className={styles.answerStateBadge} data-open={answersOpen ? 'true' : 'false'}>
-          {answersOpen ? 'Answer Open' : 'Answer Closed'}
-        </span>
-        {answersOpen && Number.isFinite(timerLeftSec) && (
-          <span className={styles.answerTimer}>⏱ Time left: {timerLeftSec}s</span>
-        )}
+        <AnswerPhaseChip
+          isOpen={answersOpenByState}
+          remainingSec={timerLeftSec}
+          totalSec={configuredTimerSec}
+          variant="play"
+        />
       </div>
 
       {answersOpen ? (story.optionGroups || []).map(group => (

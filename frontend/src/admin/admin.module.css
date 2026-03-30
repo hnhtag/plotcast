@@ -412,6 +412,38 @@
   margin-bottom: 1.5rem;
 }
 
+.phaseBanner {
+  background: #141420;
+  border: 1px solid #34344f;
+  border-radius: 10px;
+  color: #cbcbe0;
+  font-size: 0.9rem;
+  padding: 0.65rem 0.85rem;
+  margin: 0 0 1rem;
+}
+
+.timerPresetRow {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin: 0.2rem 0 0.35rem;
+}
+
+.timerPresetBtn {
+  background: #151521;
+  color: #c9c9df;
+  border: 1px solid #34344f;
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.timerPresetBtn:hover {
+  border-color: #7c6fff;
+  color: #efeefe;
+}
+
 .btnStart {
   background: #4caf50;
   color: #fff;
@@ -982,7 +1014,7 @@
 
 /* ─── Share Link ─────────────────────────────────────────────────────────── */
 .shareSection {
-  margin-top: 1.5rem;
+  margin: 1.5rem 0;
   padding: 1rem 1.25rem;
   background: #111118;
   border: 1px solid #2e2e40;

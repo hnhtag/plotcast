@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { getPlayerState } from '../../services/api.js';
 import { usePlay } from '../PlayContext.jsx';
 import { useInterval } from '../../hooks/useInterval.js';
-import CharacterReveal from '../components/CharacterReveal.jsx';
 import ScoreMeter from '../components/ScoreMeter.jsx';
 import styles from '../play.module.css';
 
@@ -20,7 +19,6 @@ export default function KeyTakeawayPage() {
     setTotalScore,
   } = usePlay();
   const navigate = useNavigate();
-  const [currentCharacter, setCurrentCharacter] = useState(null);
   const [motivation, setMotivation] = useState('The next story is another chance to shape your path.');
 
   useEffect(() => {
@@ -38,13 +36,11 @@ export default function KeyTakeawayPage() {
         currentStoryIndex: newIdx,
         hasVotedCurrentStory,
         totalScore: newTotalScore,
-        currentCharacter: newCharacter,
         motivation: newMotivation,
       } = res.data;
 
       setTotalScore(newTotalScore || 0);
       setHasVoted(Boolean(hasVotedCurrentStory));
-      setCurrentCharacter(newCharacter || null);
       setMotivation(newMotivation || 'The next story is another chance to shape your path.');
 
       if (status === 'finished') { navigate('/play/finished'); return; }
@@ -67,7 +63,6 @@ export default function KeyTakeawayPage() {
           {lastVoteResult?.scoreAwarded ?? 0} pts
         </div>
         <ScoreMeter current={totalScore} max={maxScore} />
-        <CharacterReveal character={currentCharacter} />
         <p className={styles.motivationText}>{motivation}</p>
         <h2 className={styles.heading}>Key Takeaway</h2>
         <p className={styles.takeawayText}>{lastVoteResult?.keyTakeaway || '—'}</p>

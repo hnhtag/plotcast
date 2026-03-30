@@ -1,4 +1,5 @@
 import React from "react";
+import AnswerPhaseChip from "../../components/AnswerPhaseChip.jsx";
 import LiveBar from "../components/LiveBar.jsx";
 import styles from "../screen.module.css";
 
@@ -18,6 +19,7 @@ export default function StoryScreen({ liveState }) {
     currentStoryIndex,
     totalStories,
     answersOpen,
+    answerTimerSec,
     answerRemainingSec,
   } = liveState;
   const groups = story?.optionGroups || [];
@@ -36,35 +38,33 @@ export default function StoryScreen({ liveState }) {
         <h1 className={styles.storyTitle}>{story?.title}</h1>
         <p className={styles.storyBody}>{story?.story}</p>
         <div className={styles.answerStateRow}>
-          <span className={styles.answerStateBadge} data-open={answersOpen ? 'true' : 'false'}>
-            {answersOpen ? 'Answers Open' : 'Answers Closed'}
-          </span>
-          {answersOpen && Number.isFinite(answerRemainingSec) && (
-            <span className={styles.answerTimer}>⏱ Time left: {Math.max(0, Math.floor(answerRemainingSec))}s</span>
-          )}
+          <AnswerPhaseChip
+            isOpen={answersOpen}
+            remainingSec={answerRemainingSec}
+            totalSec={answerTimerSec}
+            variant="screen"
+          />
         </div>
       </section>
 
-      {answersOpen ? (
-      <div className={styles.barsContainer}>
-        {groups.map((group, gi) => (
-          <div key={group.id} className={styles.barGroup}>
-            <p className={styles.barGroupLabel}>{group.title}</p>
-            {(group.options || []).map((opt) => (
-              <LiveBar
-                key={opt.id}
-                optionText={opt.text}
-                count={voteCounts[opt.id] || 0}
-                totalVotes={totalVotes}
-                color={GROUP_COLORS[gi % GROUP_COLORS.length]}
-              />
-            ))}
-          </div>
-        ))}
-      </div>
-      ) : (
-        <div className={styles.storyLockedNote}>Host is presenting the story. Answers will appear when opened.</div>
-      )}
+      {
+        <div className={styles.barsContainer}>
+          {groups.map((group, gi) => (
+            <div key={group.id} className={styles.barGroup}>
+              <p className={styles.barGroupLabel}>{group.title}</p>
+              {(group.options || []).map((opt) => (
+                <LiveBar
+                  key={opt.id}
+                  optionText={opt.text}
+                  count={voteCounts[opt.id] || 0}
+                  totalVotes={totalVotes}
+                  color={GROUP_COLORS[gi % GROUP_COLORS.length]}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      }
     </div>
   );
 }

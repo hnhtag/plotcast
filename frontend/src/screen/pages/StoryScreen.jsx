@@ -40,7 +40,7 @@ export default function StoryScreen({ liveState }) {
             {answersOpen ? 'Answers Open' : 'Answers Closed'}
           </span>
           {answersOpen && Number.isFinite(answerRemainingSec) && (
-            <span className={styles.answerTimer}>Time left: {Math.max(0, Math.floor(answerRemainingSec))}s</span>
+            <span className={styles.answerTimer}>⏱ Time left: {Math.max(0, Math.floor(answerRemainingSec))}s</span>
           )}
         </div>
       </section>

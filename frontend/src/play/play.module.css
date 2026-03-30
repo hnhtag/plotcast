@@ -116,8 +116,27 @@
 }
 
 .answerTimer {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 0.8rem;
-  color: #b6a9ff;
+  font-weight: 700;
+  color: #f7f3ff;
+  background: linear-gradient(90deg, #7c6fff33, #a78bfa2b);
+  border: 1px solid #8e7cff;
+  border-radius: 999px;
+  padding: 0.25rem 0.58rem;
+  box-shadow: 0 0 0 1px #00000040 inset, 0 0 12px #7c6fff44;
+  animation: answer-timer-pulse-play 1.6s ease-in-out infinite;
+}
+
+@keyframes answer-timer-pulse-play {
+  0%, 100% {
+    box-shadow: 0 0 0 1px #00000040 inset, 0 0 10px #7c6fff33;
+  }
+  50% {
+    box-shadow: 0 0 0 1px #00000040 inset, 0 0 16px #a78bfa80;
+  }
 }
 
 .storyCounter {

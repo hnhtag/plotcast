@@ -151,7 +151,7 @@ export default function StoryPage() {
           {answersOpen ? 'Answer Open' : 'Answer Closed'}
         </span>
         {answersOpen && Number.isFinite(timerLeftSec) && (
-          <span className={styles.answerTimer}>Time left: {timerLeftSec}s</span>
+          <span className={styles.answerTimer}>⏱ Time left: {timerLeftSec}s</span>
         )}
       </div>
 

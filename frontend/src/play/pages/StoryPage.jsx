@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getEventState, submitVote } from '../../services/api.js';
+import { getEventState, getPlayerState, submitVote } from '../../services/api.js';
 import { usePlay } from '../PlayContext.jsx';
 import { useInterval } from '../../hooks/useInterval.js';
 import OptionCard from '../components/OptionCard.jsx';
@@ -8,7 +8,17 @@ import ScoreMeter from '../components/ScoreMeter.jsx';
 import styles from '../play.module.css';
 
 export default function StoryPage() {
-  const { userId, eventId, totalScore, hasVoted, currentStoryIndex, onStoryChanged, voteSuccess } = usePlay();
+  const {
+    userId,
+    eventId,
+    totalScore,
+    hasVoted,
+    currentStoryIndex,
+    onStoryChanged,
+    voteSuccess,
+    setHasVoted,
+    setTotalScore,
+  } = usePlay();
   const navigate = useNavigate();
   const [state, setState] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null); // { groupId, optionId }
@@ -19,28 +29,59 @@ export default function StoryPage() {
 
   async function fetchState() {
     try {
-      const res = await getEventState(eventId);
-      setState(res.data);
-      onStoryChanged(res.data.currentStoryIndex);
-      if (res.data.status === 'finished') navigate('/play/finished');
+      const [eventRes, playerRes] = await Promise.all([
+        getEventState(eventId),
+        getPlayerState(eventId, userId),
+      ]);
+
+      const eventState = eventRes.data;
+      const playerState = playerRes.data;
+
+      setState(eventState);
+      setTotalScore(playerState.totalScore || 0);
+      setHasVoted(Boolean(playerState.hasVotedCurrentStory));
+      onStoryChanged(playerState.currentStoryIndex);
+
+      if (playerState.status === 'finished') {
+        navigate('/play/finished');
+        return;
+      }
+
+      if (playerState.hasVotedCurrentStory) {
+        navigate('/play/wait-next');
+      }
     } catch {}
   }
 
   const poll = useCallback(async () => {
     try {
-      const res = await getEventState(eventId);
-      const { status, currentStoryIndex: newIdx } = res.data;
-      if (status === 'finished') { navigate('/play/finished'); return; }
-      if (newIdx !== currentStoryIndex) {
-        onStoryChanged(newIdx);
-        setState(res.data);
+      const [eventRes, playerRes] = await Promise.all([
+        getEventState(eventId),
+        getPlayerState(eventId, userId),
+      ]);
+
+      const eventState = eventRes.data;
+      const playerState = playerRes.data;
+
+      if (playerState.status === 'finished') { navigate('/play/finished'); return; }
+
+      if (playerState.currentStoryIndex !== currentStoryIndex) {
+        onStoryChanged(playerState.currentStoryIndex);
         setSelectedOption(null);
         setError('');
       }
-    } catch {}
-  }, [eventId, currentStoryIndex, navigate, onStoryChanged]);
 
-  useInterval(poll, !hasVoted ? 2000 : null);
+      setState(eventState);
+      setTotalScore(playerState.totalScore || 0);
+      setHasVoted(Boolean(playerState.hasVotedCurrentStory));
+
+      if (playerState.hasVotedCurrentStory) {
+        navigate('/play/wait-next');
+      }
+    } catch {}
+  }, [eventId, userId, currentStoryIndex, navigate, onStoryChanged, setHasVoted, setTotalScore]);
+
+  useInterval(poll, !hasVoted ? 3000 : null);
 
   async function handleVote() {
     if (!selectedOption || submitting) return;
@@ -55,7 +96,8 @@ export default function StoryPage() {
         selectedOptionId: selectedOption.optionId,
       });
       voteSuccess(res.data);
-      navigate('/play/takeaway');
+      const hasTakeaway = Boolean(res.data?.keyTakeaway && String(res.data.keyTakeaway).trim());
+      navigate(hasTakeaway ? '/play/takeaway' : '/play/wait-next');
     } catch (err) {
       if (err.response?.status === 409) {
         // Already voted — mark as voted and show wait page

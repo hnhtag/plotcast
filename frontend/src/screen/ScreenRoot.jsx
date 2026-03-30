@@ -5,6 +5,7 @@ import { useInterval } from '../hooks/useInterval.js';
 import WaitingScreen from './pages/WaitingScreen.jsx';
 import StoryScreen from './pages/StoryScreen.jsx';
 import HallOfFateScreen from './pages/HallOfFateScreen.jsx';
+import AppFooter from '../components/AppFooter.jsx';
 
 export default function ScreenRoot() {
   const { eventId } = useParams();
@@ -34,12 +35,35 @@ export default function ScreenRoot() {
   }
 
   if (liveState.status === 'finished') {
-    return <HallOfFateScreen leaderboard={leaderboard?.leaderboard || []} title={liveState.title} />;
+    return (
+      <>
+        <HallOfFateScreen
+          leaderboard={leaderboard?.leaderboard || []}
+          averageScore={leaderboard?.averageScore || 0}
+          averageCharacter={leaderboard?.averageCharacter || null}
+          sortedCharacters={leaderboard?.sortedCharacters || []}
+          scoreStats={leaderboard?.scoreStats || null}
+          scorePoints={leaderboard?.scorePoints || []}
+          title={liveState.title}
+        />
+        <AppFooter />
+      </>
+    );
   }
 
   if (liveState.status === 'active' && liveState.story) {
-    return <StoryScreen liveState={liveState} />;
+    return (
+      <>
+        <StoryScreen liveState={liveState} />
+        <AppFooter />
+      </>
+    );
   }
 
-  return <WaitingScreen title={liveState.title} />;
+  return (
+    <>
+      <WaitingScreen title={liveState.title} />
+      <AppFooter />
+    </>
+  );
 }

@@ -18,6 +18,7 @@ export const adminChangePassword = (data) => api.post('/admin/change-password', 
 export const adminListEvents = ({ limit = 20, cursor } = {}) =>
   api.get('/admin/events', { params: { limit, ...(cursor && { cursor }) } });
 export const adminGetEvent = (eventId) => api.get(`/admin/event/${eventId}`);
+export const adminUpdateEventTitle = (data) => api.put('/admin/update-event-title', data);
 
 export const adminCreateStory = (data) => api.post('/admin/create-story', data);
 export const adminUpdateStory = (data) => api.put('/admin/update-story', data);
@@ -31,9 +32,13 @@ export const adminStart = (eventId) => api.post('/admin/start', { eventId });
 export const adminNext = (eventId) => api.post('/admin/next', { eventId });
 export const adminPrev = (eventId) => api.post('/admin/prev', { eventId });
 export const adminFinish = (eventId) => api.post('/admin/finish', { eventId });
+export const adminReopen = (eventId) => api.post('/admin/reopen', { eventId });
+export const adminDuplicateEventSetup = (data) => api.post('/admin/duplicate-event-setup', data);
+export const adminDeleteEvent = (data) => api.delete('/admin/delete-event', { data });
 
 // ─── Public ───────────────────────────────────────────────────────────────────
 export const joinEvent = (data) => api.post('/join', data);
 export const getEventState = (eventId) => api.get(`/event/${eventId}/state`);
+export const getPlayerState = (eventId, userId) => api.get(`/event/${eventId}/player/${userId}/state`);
 export const submitVote = (data) => api.post('/vote', data);
 export const getLeaderboard = (eventId) => api.get(`/event/${eventId}/leaderboard`);

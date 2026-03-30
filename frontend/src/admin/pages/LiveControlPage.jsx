@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { adminGetEvent, getEventState, adminStart, adminNext, adminPrev, adminFinish } from '../../services/api.js';
+import { adminGetEvent, getEventState, adminStart, adminNext, adminPrev, adminFinish, adminReopen } from '../../services/api.js';
 import { useAdmin } from '../AdminContext.jsx';
 import { useInterval } from '../../hooks/useInterval.js';
 import LiveVoteBar from '../components/LiveVoteBar.jsx';
@@ -124,7 +124,14 @@ export default function LiveControlPage() {
             </button>
           </>
         )}
-        {isFinished && <span className={styles.hint}>Event finished.</span>}
+        {isFinished && (
+          <>
+            <button className={styles.btnSecondary} disabled={actionLoading} onClick={() => doAction(adminReopen, 'Move to waiting')}>
+              Move to Waiting
+            </button>
+            <span className={styles.hint}>Event finished.</span>
+          </>
+        )}
       </div>
 
       {/* Current Story Preview */}
@@ -166,6 +173,7 @@ export default function LiveControlPage() {
       <div className={styles.navLinks}>
         <a className={styles.link} href="/admin/stories">Manage Stories</a>
         <a className={styles.link} href="/admin/characters">Manage Characters</a>
+        <a className={styles.link} href="/admin/report">View Report</a>
         {!isFinished && <a className={styles.link} href={`/screen/${eventId}`} target="_blank">Open Presentation Screen ↗</a>}
       </div>
     </div>

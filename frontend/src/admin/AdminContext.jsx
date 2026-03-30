@@ -28,6 +28,13 @@ export function AdminProvider({ children }) {
     saveEventToHistory(id, '');
   }
 
+  function clearSelectedEvent() {
+    sessionStorage.removeItem('adminEventId');
+    setEventId(null);
+    setEventData(null);
+    setLiveState(null);
+  }
+
   function logout() {
     sessionStorage.removeItem('adminToken');
     sessionStorage.removeItem('adminEventId');
@@ -38,7 +45,7 @@ export function AdminProvider({ children }) {
   }
 
   return (
-    <AdminContext.Provider value={{ token, eventId, eventData, liveState, setEventData, setLiveState, login, selectEvent, logout }}>
+    <AdminContext.Provider value={{ token, eventId, eventData, liveState, setEventData, setLiveState, login, selectEvent, clearSelectedEvent, logout }}>
       {children}
     </AdminContext.Provider>
   );

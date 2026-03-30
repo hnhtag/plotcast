@@ -38,7 +38,7 @@ export default function StoryEditorPage() {
         setForm({
           title: story.title,
           story: story.story,
-          keyTakeaway: story.keyTakeaway,
+          keyTakeaway: story.keyTakeaway || '',
           optionGroups: story.optionGroups,
         });
       }
@@ -100,14 +100,13 @@ export default function StoryEditorPage() {
           required
         />
 
-        <label className={styles.label}>Key Takeaway <span className={styles.hint}>(revealed after vote)</span></label>
+        <label className={styles.label}>Key Takeaway <span className={styles.hint}>(optional, revealed after vote)</span></label>
         <textarea
           className={styles.textarea}
           value={form.keyTakeaway}
           onChange={e => setForm(f => ({ ...f, keyTakeaway: e.target.value }))}
           placeholder="The insight or lesson participants will discover…"
           rows={3}
-          required
         />
 
         <label className={styles.label}>Option Groups</label>

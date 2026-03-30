@@ -1,0 +1,43 @@
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 1rem 0.7rem;
+  box-sizing: border-box;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 10, 18, 0),
+    rgba(10, 10, 18, 0.82)
+  );
+  pointer-events: none;
+  z-index: 999;
+}
+
+.text {
+  margin: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.01em;
+  color: #777791;
+  text-align: center;
+  pointer-events: auto;
+}
+
+.link {
+  color: #a0a0b8;
+  text-decoration: underline;
+  text-underline-offset: 0.12rem;
+}
+
+.link:hover {
+  color: #c7c7de;
+}
+
+@media (max-width: 640px) {
+  .text {
+    font-size: 0.72rem;
+  }
+}

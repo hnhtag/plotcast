@@ -1,28 +1,31 @@
 import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getEventState } from '../../services/api.js';
+import { getPlayerState } from '../../services/api.js';
 import { usePlay } from '../PlayContext.jsx';
 import { useInterval } from '../../hooks/useInterval.js';
 import styles from '../play.module.css';
 
 export default function WaitingPage() {
-  const { eventId, nickname, onStoryChanged } = usePlay();
+  const { eventId, userId, nickname, onStoryChanged, setHasVoted, setTotalScore } = usePlay();
   const navigate = useNavigate();
 
   const poll = useCallback(async () => {
     try {
-      const res = await getEventState(eventId);
-      const { status, currentStoryIndex } = res.data;
+      const res = await getPlayerState(eventId, userId);
+      const { status, currentStoryIndex, hasVotedCurrentStory, totalScore } = res.data;
+      setTotalScore(totalScore || 0);
+      setHasVoted(Boolean(hasVotedCurrentStory));
+
       if (status === 'finished') {
         navigate('/play/finished');
       } else if (status === 'active' && currentStoryIndex >= 0) {
         onStoryChanged(currentStoryIndex);
-        navigate('/play/story');
+        navigate(hasVotedCurrentStory ? '/play/wait-next' : '/play/story');
       }
     } catch {}
-  }, [eventId, navigate]);
+  }, [eventId, userId, navigate, onStoryChanged, setHasVoted, setTotalScore]);
 
-  useInterval(poll, 2000);
+  useInterval(poll, 3000);
 
   return (
     <div className={styles.page}>

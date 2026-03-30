@@ -6,7 +6,7 @@ const TABLE = process.env.TABLE_NAME;
 
 module.exports = async function createStory(c) {
   const body = await c.req.json();
-  requireFields(body, ['eventId', 'title', 'story', 'keyTakeaway', 'optionGroups']);
+  requireFields(body, ['eventId', 'title', 'story', 'optionGroups']);
   const { eventId, title, story, keyTakeaway, optionGroups } = body;
 
   if (!Array.isArray(optionGroups) || optionGroups.length === 0) {

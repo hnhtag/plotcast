@@ -1,0 +1,111 @@
+.wrap {
+  width: 100%;
+}
+
+.svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.plotBg {
+  fill: #10101a;
+  stroke: #24243a;
+}
+
+.gridLine {
+  stroke: #2d2d46;
+  stroke-dasharray: 4 4;
+  stroke-width: 1;
+}
+
+.axisLine {
+  stroke: #4a4a68;
+  stroke-width: 1.2;
+}
+
+.axisText {
+  fill: #83839d;
+  font-size: 11px;
+}
+
+.axisLabel {
+  fill: #a9a9c5;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.barPositive,
+.barNegative,
+.barNeutral {
+  opacity: 0.92;
+}
+
+.barPositive {
+  fill: #4ecb71;
+}
+
+.barNegative {
+  fill: #f06a6a;
+}
+
+.barNeutral {
+  fill: #b7b7cf;
+}
+
+.summaryRow {
+  margin-top: 0.45rem;
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  color: #a3a3bb;
+  font-size: 0.76rem;
+}
+
+.summaryRow strong {
+  color: #d8d8ea;
+  font-weight: 700;
+}
+
+.legend {
+  margin-top: 0.45rem;
+  display: flex;
+  gap: 0.9rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.legendItem,
+.legendTrend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #9a9ab4;
+  font-size: 0.76rem;
+}
+
+.legendDotPositive,
+.legendDotNegative,
+.legendDotNeutral {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.legendDotPositive {
+  background: #4ecb71;
+}
+
+.legendDotNegative {
+  background: #f06a6a;
+}
+
+.legendDotNeutral {
+  background: #b7b7cf;
+}
+
+.empty {
+  color: #888;
+  font-size: 0.9rem;
+}

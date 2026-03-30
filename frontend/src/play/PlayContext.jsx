@@ -34,10 +34,26 @@ export function PlayProvider({ children }) {
     setLastVoteResult({ keyTakeaway: result.keyTakeaway, scoreAwarded: result.scoreAwarded });
   }
 
+  function restoreSession(session) {
+    const safeEventId = session?.eventId || '';
+    const safeNickname = session?.nickname || '';
+
+    if (safeEventId) localStorage.setItem('plotcast_eventId', safeEventId);
+    if (safeNickname) localStorage.setItem('plotcast_nickname', safeNickname);
+
+    setEventId(safeEventId);
+    setNickname(safeNickname);
+    setTotalScore(session?.totalScore || 0);
+    setCurrentStoryIndex(
+      Number.isInteger(session?.currentStoryIndex) ? session.currentStoryIndex : -1
+    );
+    setHasVoted(Boolean(session?.hasVotedCurrentStory));
+    setLastVoteResult(null);
+  }
+
   const onStoryChanged = useCallback((newIndex) => {
     if (newIndex !== currentStoryIndex) {
       setCurrentStoryIndex(newIndex);
-      setHasVoted(false);
       setLastVoteResult(null);
     }
   }, [currentStoryIndex]);
@@ -45,7 +61,7 @@ export function PlayProvider({ children }) {
   return (
     <PlayContext.Provider value={{
       userId, nickname, eventId, totalScore, hasVoted, lastVoteResult, currentStoryIndex,
-      setTotalScore, joinSuccess, voteSuccess, onStoryChanged, setHasVoted,
+      setTotalScore, joinSuccess, voteSuccess, onStoryChanged, setHasVoted, restoreSession,
     }}>
       {children}
     </PlayContext.Provider>

@@ -20,7 +20,7 @@ export default function HallEntry({ entry, style }) {
         )}
       </div>
       <div className={styles.hallScore} style={{ color: isTop ? color : '#444' }}>
-        {entry.isMasked ? '???' : `${entry.totalScore} pts`}
+        {`${entry.totalScore} pts`}
       </div>
     </div>
   );

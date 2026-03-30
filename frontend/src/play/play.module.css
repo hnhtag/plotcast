@@ -281,6 +281,13 @@
   line-height: 1.6;
 }
 
+.motivationText {
+  font-size: 0.92rem;
+  color: #cfc5ff;
+  line-height: 1.6;
+  text-align: center;
+}
+
 /* ─── Locked Event ID (join via share link) ──────────────────────────────── */
 .eventIdLocked {
   display: flex;

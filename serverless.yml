@@ -21,9 +21,9 @@ provider:
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
             - dynamodb:Query
-            - dynamodb:BatchWriteItem
           Resource:
             - !GetAtt PlotCastTable.Arn
+            - !Sub "${PlotCastTable.Arn}/index/EventsByCreatedAtIndex"
 
 package:
   patterns:
@@ -51,6 +51,7 @@ resources:
   Resources:
     PlotCastTable:
       Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
       Properties:
         TableName: PlotCastTable
         BillingMode: PAY_PER_REQUEST
@@ -59,8 +60,25 @@ resources:
             AttributeType: S
           - AttributeName: SK
             AttributeType: S
+          - AttributeName: entityType
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: S
         KeySchema:
           - AttributeName: PK
             KeyType: HASH
           - AttributeName: SK
             KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: EventsByCreatedAtIndex
+            KeySchema:
+              - AttributeName: entityType
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: INCLUDE
+              NonKeyAttributes:
+                - eventId
+                - title
+                - status

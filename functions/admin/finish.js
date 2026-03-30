@@ -1,4 +1,4 @@
-const { GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
+const { UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const db = require('../shared/db');
 const { requireFields } = require('../shared/validate');
 
@@ -9,20 +9,24 @@ module.exports = async function finish(c) {
   requireFields(body, ['eventId']);
   const { eventId } = body;
 
-  const result = await db.send(new GetCommand({
-    TableName: TABLE,
-    Key: { PK: `EVENT#${eventId}`, SK: 'META' },
-  }));
-  if (!result.Item) throw { statusCode: 404, message: 'Event not found' };
-  if (result.Item.status === 'finished') throw { statusCode: 400, message: 'Event is already finished' };
-
-  await db.send(new UpdateCommand({
-    TableName: TABLE,
-    Key: { PK: `EVENT#${eventId}`, SK: 'META' },
-    UpdateExpression: 'SET #s = :finished, finishedAt = :now',
-    ExpressionAttributeNames: { '#s': 'status' },
-    ExpressionAttributeValues: { ':finished': 'finished', ':now': new Date().toISOString() },
-  }));
+  try {
+    await db.send(new UpdateCommand({
+      TableName: TABLE,
+      Key: { PK: `EVENT#${eventId}`, SK: 'META' },
+      UpdateExpression: 'SET #s = :finished, finishedAt = :now',
+      ConditionExpression: 'attribute_exists(PK) AND #s <> :finished',
+      ExpressionAttributeNames: { '#s': 'status' },
+      ExpressionAttributeValues: {
+        ':finished': 'finished',
+        ':now': new Date().toISOString(),
+      },
+    }));
+  } catch (err) {
+    if (err.name === 'ConditionalCheckFailedException') {
+      throw { statusCode: 400, message: 'Event not found or already finished' };
+    }
+    throw err;
+  }
 
   return c.json({ ok: true, status: 'finished' });
 };

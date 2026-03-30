@@ -15,7 +15,8 @@ api.interceptors.request.use((config) => {
 export const adminCreateEvent = (data) => api.post('/admin/create-event', data);
 export const adminLogin = (data) => api.post('/admin/login', data);
 export const adminChangePassword = (data) => api.post('/admin/change-password', data);
-export const adminListEvents = () => api.get('/admin/events');
+export const adminListEvents = ({ limit = 20, cursor } = {}) =>
+  api.get('/admin/events', { params: { limit, ...(cursor && { cursor }) } });
 export const adminGetEvent = (eventId) => api.get(`/admin/event/${eventId}`);
 
 export const adminCreateStory = (data) => api.post('/admin/create-story', data);

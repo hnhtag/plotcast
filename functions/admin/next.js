@@ -1,4 +1,4 @@
-const { GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
+const { UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const db = require('../shared/db');
 const { requireFields } = require('../shared/validate');
 
@@ -9,23 +9,23 @@ module.exports = async function next(c) {
   requireFields(body, ['eventId']);
   const { eventId } = body;
 
-  const result = await db.send(new GetCommand({
-    TableName: TABLE,
-    Key: { PK: `EVENT#${eventId}`, SK: 'META' },
-  }));
-  if (!result.Item) throw { statusCode: 404, message: 'Event not found' };
-  if (result.Item.status !== 'active') throw { statusCode: 400, message: 'Event is not active' };
+  let result;
+  try {
+    result = await db.send(new UpdateCommand({
+      TableName: TABLE,
+      Key: { PK: `EVENT#${eventId}`, SK: 'META' },
+      UpdateExpression: 'SET currentStoryIndex = currentStoryIndex + :one',
+      ConditionExpression: 'attribute_exists(PK) AND #s = :active',
+      ExpressionAttributeNames: { '#s': 'status' },
+      ExpressionAttributeValues: { ':active': 'active', ':one': 1 },
+      ReturnValues: 'ALL_NEW',
+    }));
+  } catch (err) {
+    if (err.name === 'ConditionalCheckFailedException') {
+      throw { statusCode: 400, message: 'Event not found or not active' };
+    }
+    throw err;
+  }
 
-  const { currentStoryIndex, totalStories } = result.Item;
-  if (currentStoryIndex >= totalStories - 1) throw { statusCode: 400, message: 'Already at last story' };
-
-  const newIndex = currentStoryIndex + 1;
-  await db.send(new UpdateCommand({
-    TableName: TABLE,
-    Key: { PK: `EVENT#${eventId}`, SK: 'META' },
-    UpdateExpression: 'SET currentStoryIndex = :idx',
-    ExpressionAttributeValues: { ':idx': newIndex },
-  }));
-
-  return c.json({ ok: true, currentStoryIndex: newIndex });
+  return c.json({ ok: true, currentStoryIndex: result.Attributes.currentStoryIndex });
 };

@@ -1,4 +1,4 @@
-const { GetCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
+const { GetCommand } = require('@aws-sdk/lib-dynamodb');
 const db = require('../shared/db');
 
 const TABLE = process.env.TABLE_NAME;
@@ -29,32 +29,11 @@ module.exports = async function getState(c) {
     }));
 
     if (storyResult.Item) {
-      // Strip keyTakeaway — only returned after voting
-      const { keyTakeaway, ...storyPublic } = storyResult.Item;
+      const { keyTakeaway, voteCounts, totalVotes, ...storyPublic } = storyResult.Item;
       response.story = storyPublic;
+      response.voteCounts = voteCounts || {};
+      response.totalVotes = totalVotes || 0;
     }
-
-    const answersResult = await db.send(new QueryCommand({
-      TableName: TABLE,
-      KeyConditionExpression: 'PK = :pk AND begins_with(SK, :prefix)',
-      FilterExpression: 'storyIndex = :si',
-      ExpressionAttributeValues: {
-        ':pk': `EVENT#${eventId}`,
-        ':prefix': 'ANSWER#',
-        ':si': meta.currentStoryIndex,
-      },
-    }));
-
-    const voteCounts = {};
-    let totalVotes = 0;
-    for (const answer of (answersResult.Items || [])) {
-      const optId = answer.selectedOptionId;
-      voteCounts[optId] = (voteCounts[optId] || 0) + 1;
-      totalVotes++;
-    }
-
-    response.voteCounts = voteCounts;
-    response.totalVotes = totalVotes;
   }
 
   return c.json(response);

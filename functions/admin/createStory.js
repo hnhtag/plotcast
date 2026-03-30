@@ -24,7 +24,7 @@ module.exports = async function createStory(c) {
 
   await db.send(new PutCommand({
     TableName: TABLE,
-    Item: { PK: `EVENT#${eventId}`, SK: `STORY#${paddedIndex}`, storyIndex, title, story, keyTakeaway, optionGroups, createdAt: new Date().toISOString() },
+    Item: { PK: `EVENT#${eventId}`, SK: `STORY#${paddedIndex}`, storyIndex, title, story, keyTakeaway, optionGroups, voteCounts: {}, totalVotes: 0, createdAt: new Date().toISOString() },
   }));
   await db.send(new UpdateCommand({
     TableName: TABLE,

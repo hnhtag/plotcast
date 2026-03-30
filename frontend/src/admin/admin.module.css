@@ -15,10 +15,10 @@
   margin-bottom: 2rem;
 }
 
-.addByIdForm {
+.loadMoreRow {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  justify-content: center;
+  margin-top: 1.5rem;
 }
 
 .card {

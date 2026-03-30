@@ -15,7 +15,7 @@ module.exports = async function createEvent(c) {
 
   await db.send(new PutCommand({
     TableName: TABLE,
-    Item: { PK: `EVENT#${eventId}`, SK: 'META', eventId, title, status: 'waiting', currentStoryIndex: -1, totalStories: 0, createdAt },
+    Item: { PK: `EVENT#${eventId}`, SK: 'META', entityType: 'EVENT', eventId, title, status: 'waiting', currentStoryIndex: -1, totalStories: 0, createdAt },
   }));
 
   return c.json({ eventId, title });

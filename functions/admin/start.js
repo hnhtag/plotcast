@@ -1,4 +1,4 @@
-const { GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
+const { UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const db = require('../shared/db');
 const { requireFields } = require('../shared/validate');
 
@@ -9,21 +9,26 @@ module.exports = async function start(c) {
   requireFields(body, ['eventId']);
   const { eventId } = body;
 
-  const result = await db.send(new GetCommand({
-    TableName: TABLE,
-    Key: { PK: `EVENT#${eventId}`, SK: 'META' },
-  }));
-  if (!result.Item) throw { statusCode: 404, message: 'Event not found' };
-  if (result.Item.status !== 'waiting') throw { statusCode: 400, message: `Event is already ${result.Item.status}` };
-  if (result.Item.totalStories === 0) throw { statusCode: 400, message: 'Cannot start event with no stories' };
-
-  await db.send(new UpdateCommand({
-    TableName: TABLE,
-    Key: { PK: `EVENT#${eventId}`, SK: 'META' },
-    UpdateExpression: 'SET #s = :active, currentStoryIndex = :zero, startedAt = :now',
-    ExpressionAttributeNames: { '#s': 'status' },
-    ExpressionAttributeValues: { ':active': 'active', ':zero': 0, ':now': new Date().toISOString() },
-  }));
+  try {
+    await db.send(new UpdateCommand({
+      TableName: TABLE,
+      Key: { PK: `EVENT#${eventId}`, SK: 'META' },
+      UpdateExpression: 'SET #s = :active, currentStoryIndex = :zero, startedAt = :now',
+      ConditionExpression: 'attribute_exists(PK) AND #s = :waiting AND totalStories > :zero',
+      ExpressionAttributeNames: { '#s': 'status' },
+      ExpressionAttributeValues: {
+        ':active': 'active',
+        ':waiting': 'waiting',
+        ':zero': 0,
+        ':now': new Date().toISOString(),
+      },
+    }));
+  } catch (err) {
+    if (err.name === 'ConditionalCheckFailedException') {
+      throw { statusCode: 400, message: 'Event not found, already started, or has no stories' };
+    }
+    throw err;
+  }
 
   return c.json({ ok: true, status: 'active', currentStoryIndex: 0 });
 };

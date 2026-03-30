@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "deploy:backend": "cd functions && npm install && cd .. && serverless deploy --aws-profile default",
-    "deploy:frontend": "cd frontend && npm install && npm run build && cd .. && aws s3 sync frontend/dist s3://plotcast-dev --delete --profile default && aws cloudfront create-invalidation --distribution-id E1JX2KQV6S3DUG --paths \"/*\" --profile default"
+    "deploy:backend": "cd functions && npm install && cd .. && serverless deploy --aws-profile rdlab",
+    "deploy:frontend": "cd frontend && npm install && npm run build && cd .. && aws s3 sync frontend/dist s3://plotcast-dev --delete --profile rdlab && aws cloudfront create-invalidation --distribution-id E1JX2KQV6S3DUG --paths \"/*\" --profile rdlab"
   }
 }

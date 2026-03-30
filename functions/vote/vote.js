@@ -9,21 +9,19 @@ module.exports = async function vote(c) {
   requireFields(body, ['eventId', 'userId', 'storyIndex', 'selectedOptionId', 'groupId']);
   const { eventId, userId, storyIndex, selectedOptionId, groupId } = body;
 
-  const metaResult = await db.send(new GetCommand({
-    TableName: TABLE,
-    Key: { PK: `EVENT#${eventId}`, SK: 'META' },
-  }));
+  const paddedIndex = String(storyIndex).padStart(3, '0');
+
+  // Fetch META and STORY in parallel — storyIndex is known from the request body
+  const [metaResult, storyResult] = await Promise.all([
+    db.send(new GetCommand({ TableName: TABLE, Key: { PK: `EVENT#${eventId}`, SK: 'META' } })),
+    db.send(new GetCommand({ TableName: TABLE, Key: { PK: `EVENT#${eventId}`, SK: `STORY#${paddedIndex}` } })),
+  ]);
+
   if (!metaResult.Item) throw { statusCode: 404, message: 'Event not found' };
   if (metaResult.Item.status !== 'active') throw { statusCode: 400, message: 'Event is not active' };
   if (metaResult.Item.currentStoryIndex !== storyIndex) {
     throw { statusCode: 400, message: 'Story index mismatch — event has moved to a different story' };
   }
-
-  const paddedIndex = String(storyIndex).padStart(3, '0');
-  const storyResult = await db.send(new GetCommand({
-    TableName: TABLE,
-    Key: { PK: `EVENT#${eventId}`, SK: `STORY#${paddedIndex}` },
-  }));
   if (!storyResult.Item) throw { statusCode: 404, message: 'Story not found' };
 
   const story = storyResult.Item;
@@ -52,6 +50,14 @@ module.exports = async function vote(c) {
     }
     throw condErr;
   }
+
+  await db.send(new UpdateCommand({
+    TableName: TABLE,
+    Key: { PK: `EVENT#${eventId}`, SK: `STORY#${paddedIndex}` },
+    UpdateExpression: 'SET voteCounts.#optId = if_not_exists(voteCounts.#optId, :zero) + :one ADD totalVotes :one',
+    ExpressionAttributeNames: { '#optId': selectedOptionId },
+    ExpressionAttributeValues: { ':zero': 0, ':one': 1 },
+  }));
 
   const userResult = await db.send(new UpdateCommand({
     TableName: TABLE,

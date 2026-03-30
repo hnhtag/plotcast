@@ -400,16 +400,141 @@
   color: #ff6b6b;
 }
 
-.controlBar {
+.controlStack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.controlBarCompact {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   flex-wrap: wrap;
+  gap: 0.6rem;
   background: #1a1a24;
   border: 1px solid #2e2e40;
   border-radius: 12px;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.5rem;
+  padding: 0.7rem 0.8rem;
+  margin-bottom: 1.25rem;
+}
+
+.controlGroupCompact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.controlGroupLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #a9a4cf;
+  margin-right: 0.1rem;
+}
+
+.controlDividerCompact {
+  width: 1px;
+  height: 1.65rem;
+  background: #33324a;
+  margin: 0 0.1rem;
+}
+
+.controlMetaCompact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.controlHintCompact {
+  font-size: 0.78rem;
+  color: #8a86aa;
+}
+
+.controlPanel,
+.controlPanelDanger {
+  background: #1a1a24;
+  border: 1px solid #2e2e40;
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+}
+
+.controlPanelDanger {
+  border-color: #4a2a34;
+}
+
+.controlPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.6rem;
+}
+
+.controlPanelTitle {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #bcb8e6;
+}
+
+.controlActionRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.controlPanelButtonRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.controlSummaryRow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.55rem;
+}
+
+.controlSummaryChip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0.32rem 0.58rem;
+  border-radius: 999px;
+  border: 1px solid #34344f;
+  background: #141420;
+  color: #aaa6ca;
+  font-size: 0.78rem;
+}
+
+.controlSummaryChip strong {
+  color: #eceafd;
+  margin-left: 0.3rem;
+}
+
+.storyNavGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.controlBtnCompact {
+  min-height: 2.1rem;
+  padding: 0.44rem 0.82rem;
+  font-size: 0.86rem;
+  line-height: 1.1;
 }
 
 .phaseBanner {
@@ -481,10 +606,72 @@
 }
 
 .storyCounter {
-  font-size: 1rem;
+  font-size: 0.92rem;
   font-weight: 700;
   color: #c0c0d0;
-  padding: 0 0.5rem;
+  min-width: 3.8rem;
+  text-align: center;
+  padding: 0 0.35rem;
+}
+
+.liveAnswerState {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid #3a3852;
+  background: #141420;
+  color: #9b98b9;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.liveAnswerState[data-open="true"] {
+  color: #8effbf;
+  border-color: #24563a;
+  background: #112218;
+}
+
+.statusList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@media (max-width: 720px) {
+  .controlBarCompact {
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .controlDividerCompact {
+    display: none;
+  }
+
+  .controlGroupCompact,
+  .controlMetaCompact {
+    width: 100%;
+  }
+}
+
+.statusRowInline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.statusLabel {
+  font-size: 0.88rem;
+  color: #aaa6ca;
+}
+
+.statusValue {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #eceafd;
 }
 
 .voteSummary {

@@ -11,6 +11,28 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Auto-logout on admin auth failures so stale tokens don't trap the UI.
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error?.response?.status;
+    const requestUrl = String(error?.config?.url || '');
+    const isAdminRequest = requestUrl.startsWith('/admin/');
+    const isLoginRequest = requestUrl.startsWith('/admin/login');
+
+    if (status === 401 && isAdminRequest && !isLoginRequest) {
+      sessionStorage.removeItem('adminToken');
+      sessionStorage.removeItem('adminEventId');
+
+      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
+        window.location.replace('/admin/login');
+      }
+    }
+
+    return Promise.reject(error);
+  },
+);
+
 // ─── Admin ────────────────────────────────────────────────────────────────────
 export const adminCreateEvent = (data) => api.post('/admin/create-event', data);
 export const adminCreateMockEventSetup = () => api.post('/admin/create-mock-event-setup');
@@ -34,6 +56,7 @@ export const adminNext = (eventId) => api.post('/admin/next', { eventId });
 export const adminPrev = (eventId) => api.post('/admin/prev', { eventId });
 export const adminFinish = (eventId) => api.post('/admin/finish', { eventId });
 export const adminOpenAnswers = (eventId) => api.post('/admin/open-answers', { eventId });
+export const adminCloseAnswers = (eventId) => api.post('/admin/close-answers', { eventId });
 export const adminUpdateLiveSettings = (data) => api.put('/admin/update-live-settings', data);
 export const adminReopen = (eventId) => api.post('/admin/reopen', { eventId });
 export const adminDuplicateEventSetup = (data) => api.post('/admin/duplicate-event-setup', data);

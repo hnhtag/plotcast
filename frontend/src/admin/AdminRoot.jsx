@@ -8,6 +8,7 @@ import ManageStoriesPage from './pages/ManageStoriesPage.jsx';
 import StoryEditorPage from './pages/StoryEditorPage.jsx';
 import CharactersPage from './pages/CharactersPage.jsx';
 import LiveControlPage from './pages/LiveControlPage.jsx';
+import AnswerFlowSettingsPage from './pages/AnswerFlowSettingsPage.jsx';
 import ReportPage from './pages/ReportPage.jsx';
 import AppFooter from '../components/AppFooter.jsx';
 import styles from './admin.module.css';
@@ -63,6 +64,7 @@ function AdminRoutes() {
         <Route path="stories/edit/:storyIndex" element={eventId ? <StoryEditorPage /> : <Navigate to="/admin/events" replace />} />
         <Route path="characters" element={eventId ? <CharactersPage /> : <Navigate to="/admin/events" replace />} />
         <Route path="live" element={eventId ? <LiveControlPage /> : <Navigate to="/admin/events" replace />} />
+        <Route path="answer-flow" element={eventId ? <AnswerFlowSettingsPage /> : <Navigate to="/admin/events" replace />} />
         <Route path="report" element={eventId ? <ReportPage /> : <Navigate to="/admin/events" replace />} />
         <Route path="*" element={<Navigate to="/admin/events" replace />} />
       </Routes>

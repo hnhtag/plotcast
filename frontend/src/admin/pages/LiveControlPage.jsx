@@ -9,7 +9,7 @@ import {
   adminFinish,
   adminReopen,
   adminOpenAnswers,
-  adminUpdateLiveSettings,
+  adminCloseAnswers,
 } from "../../services/api.js";
 import { useAdmin } from "../AdminContext.jsx";
 import { useInterval } from "../../hooks/useInterval.js";
@@ -32,11 +32,6 @@ export default function LiveControlPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
-  const [autoShowAnswers, setAutoShowAnswers] = useState(true);
-  const [answerTimerSec, setAnswerTimerSec] = useState("0");
-  const [savedAutoShowAnswers, setSavedAutoShowAnswers] = useState(true);
-  const [savedAnswerTimerSec, setSavedAnswerTimerSec] = useState("0");
-  const [settingsSaving, setSettingsSaving] = useState(false);
   const shareUrl = `${window.location.origin}/play?event=${eventId}`;
 
   function handleCopy() {
@@ -62,17 +57,6 @@ export default function LiveControlPage() {
       ]);
       setEventData(eventRes.data);
       setLiveState(stateRes.data);
-      const meta = eventRes.data?.meta || {};
-      const safeAutoShow = meta.autoShowAnswers !== false;
-      const safeTimer = String(
-        Number.isFinite(Number(meta.answerTimerSec))
-          ? Number(meta.answerTimerSec)
-          : 0,
-      );
-      setAutoShowAnswers(safeAutoShow);
-      setAnswerTimerSec(safeTimer);
-      setSavedAutoShowAnswers(safeAutoShow);
-      setSavedAnswerTimerSec(safeTimer);
     } catch {
       setError("Failed to load event");
     } finally {
@@ -102,44 +86,27 @@ export default function LiveControlPage() {
     }
   }
 
-  async function saveLiveSettings() {
-    setError("");
-    setSettingsSaving(true);
-    try {
-      const timer = Math.max(0, parseInt(answerTimerSec, 10) || 0);
-      await adminUpdateLiveSettings({
-        eventId,
-        autoShowAnswers,
-        answerTimerSec: timer,
-      });
-      setSavedAutoShowAnswers(autoShowAnswers);
-      setSavedAnswerTimerSec(String(timer));
-      await loadAll();
-    } catch (err) {
-      setError(err.response?.data?.error || "Save settings failed");
-    } finally {
-      setSettingsSaving(false);
-    }
-  }
-
-  async function openAnswersWithCurrentSettings() {
+  async function openAnswers() {
     setError("");
     setActionLoading(true);
     try {
-      const timer = Math.max(0, parseInt(answerTimerSec, 10) || 0);
-      if (settingsDirty) {
-        await adminUpdateLiveSettings({
-          eventId,
-          autoShowAnswers,
-          answerTimerSec: timer,
-        });
-        setSavedAutoShowAnswers(autoShowAnswers);
-        setSavedAnswerTimerSec(String(timer));
-      }
       await adminOpenAnswers(eventId);
       await loadAll();
     } catch (err) {
       setError(err.response?.data?.error || "Open answers failed");
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  async function closeAnswers() {
+    setError("");
+    setActionLoading(true);
+    try {
+      await adminCloseAnswers(eventId);
+      await loadAll();
+    } catch (err) {
+      setError(err.response?.data?.error || "Close answers failed");
     } finally {
       setActionLoading(false);
     }
@@ -160,12 +127,10 @@ export default function LiveControlPage() {
   const totalVotes = liveState?.totalVotes || 0;
   const answersOpen = Boolean(liveState?.answersOpen);
   const answerRemainingSec = liveState?.answerRemainingSec;
-  const normalizedTimer = String(
-    Math.max(0, parseInt(answerTimerSec, 10) || 0),
-  );
-  const settingsDirty =
-    autoShowAnswers !== savedAutoShowAnswers ||
-    normalizedTimer !== savedAnswerTimerSec;
+  const autoShowAnswers = meta.autoShowAnswers !== false;
+  const answerTimerSec = Number.isFinite(Number(meta.answerTimerSec))
+    ? Number(meta.answerTimerSec)
+    : 0;
 
   return (
     <div className={styles.page}>
@@ -197,124 +162,126 @@ export default function LiveControlPage() {
 
       {error && <p className={styles.error}>{error}</p>}
 
-      <div className={styles.card}>
-        <h2 className={styles.subheading}>Answer Flow Settings</h2>
-        <label className={styles.checkboxRow}>
-          <input
-            type="checkbox"
-            checked={autoShowAnswers}
-            onChange={(e) => setAutoShowAnswers(e.target.checked)}
-          />
-          <span>Auto show answers when story starts (default flow)</span>
-        </label>
-        <label className={styles.label}>Answer Timer (seconds)</label>
-        <input
-          type="number"
-          min={0}
-          className={styles.input}
-          value={answerTimerSec}
-          onChange={(e) => setAnswerTimerSec(e.target.value)}
-          placeholder="0 = no auto-close"
-        />
-        <div className={styles.timerPresetRow}>
-          {[0, 30, 45, 60].map((sec) => (
-            <button
-              key={sec}
-              type="button"
-              className={styles.timerPresetBtn}
-              onClick={() => setAnswerTimerSec(String(sec))}
-            >
-              {sec === 0 ? "No timer" : `${sec}s`}
-            </button>
-          ))}
-        </div>
-        <p className={styles.hint}>
-          When set, answers automatically close after the timer ends.
-        </p>
-        <p className={styles.hint}>
-          {settingsDirty
-            ? "You have unsaved answer settings."
-            : "Answer settings are saved."}
-        </p>
-        <div className={styles.btnGroup}>
-          <button
-            className={styles.btnPrimary}
-            disabled={settingsSaving || !settingsDirty}
-            onClick={saveLiveSettings}
-          >
-            {settingsSaving
-              ? "Saving…"
-              : settingsDirty
-                ? "Save Answer Settings"
-                : "Saved"}
-          </button>
-        </div>
-      </div>
-
-      {/* Control Bar */}
-      <div className={styles.controlBar}>
+      <div className={styles.controlBarCompact}>
         {status === "waiting" && (
-          <button
-            className={styles.btnStart}
-            disabled={actionLoading || totalStories === 0}
-            onClick={() => doAction(adminStart, "Start")}
-          >
-            ▶ Start Event
-          </button>
-        )}
-        {isActive && (
           <>
-            <button
-              className={styles.btnControl}
-              disabled={actionLoading || currentIdx <= 0}
-              onClick={() => doAction(adminPrev, "Prev")}
-            >
-              ← Prev
-            </button>
-            <span className={styles.storyCounter}>
-              {currentIdx + 1} / {totalStories}
+            <div className={styles.controlGroupCompact}>
+              <span className={styles.controlGroupLabel}>Event</span>
+              <button
+                className={`${styles.btnStart} ${styles.controlBtnCompact}`}
+                disabled={actionLoading || totalStories === 0}
+                onClick={() => doAction(adminStart, "Start")}
+              >
+                Start Event
+              </button>
+            </div>
+            <span className={styles.controlHintCompact}>
+              {totalStories === 0
+                ? "Add at least one story before starting."
+                : `${totalStories} stor${totalStories === 1 ? "y" : "ies"} ready.`}
             </span>
-            <button
-              className={styles.btnControl}
-              disabled={actionLoading || currentIdx >= totalStories - 1}
-              onClick={() => doAction(adminNext, "Next")}
-            >
-              Next →
-            </button>
-            <button
-              className={styles.btnPrimary}
-              disabled={actionLoading || answersOpen || !currentStory}
-              onClick={openAnswersWithCurrentSettings}
-            >
-              {settingsDirty ? "Save & Open Answers" : "Open Answers"}
-            </button>
-            <span className={styles.hint}>
-              {answersOpen
-                ? `Answers Open${Number.isFinite(answerRemainingSec) ? ` · ${formatRemaining(answerRemainingSec)} left` : ""}`
-                : "Answers Closed"}
-            </span>
-            <button
-              className={styles.btnDanger}
-              disabled={actionLoading}
-              onClick={() => {
-                if (confirm("Finish event?")) doAction(adminFinish, "Finish");
-              }}
-            >
-              ■ Finish
-            </button>
           </>
         )}
-        {isFinished && (
+
+        {isActive && (
           <>
+            <div className={styles.controlGroupCompact}>
+              <span className={styles.controlGroupLabel}>Story</span>
+              <button
+                className={`${styles.btnControl} ${styles.controlBtnCompact}`}
+                disabled={actionLoading || currentIdx <= 0}
+                onClick={() => doAction(adminPrev, "Prev")}
+              >
+                Prev
+              </button>
+              <span className={styles.storyCounter}>
+                {currentIdx + 1} / {totalStories}
+              </span>
+              <button
+                className={`${styles.btnControl} ${styles.controlBtnCompact}`}
+                disabled={actionLoading || currentIdx >= totalStories - 1}
+                onClick={() => doAction(adminNext, "Next")}
+              >
+                Next
+              </button>
+            </div>
+
+            <span className={styles.controlDividerCompact} />
+
+            <div className={styles.controlGroupCompact}>
+              <span className={styles.controlGroupLabel}>Answers</span>
+              <button
+                className={`${styles.btnPrimary} ${styles.controlBtnCompact}`}
+                disabled={actionLoading || answersOpen || !currentStory}
+                onClick={openAnswers}
+              >
+                Open
+              </button>
+              <button
+                className={`${styles.btnSecondary} ${styles.controlBtnCompact}`}
+                disabled={actionLoading || !answersOpen}
+                onClick={closeAnswers}
+              >
+                Close
+              </button>
+              <button
+                className={`${styles.btnSecondary} ${styles.controlBtnCompact}`}
+                type="button"
+                onClick={() => navigate("/admin/answer-flow")}
+              >
+                ⚙ Settings
+              </button>
+            </div>
+
+            <div className={styles.controlMetaCompact}>
+              <span className={styles.controlSummaryChip}>
+                Auto: <strong>{autoShowAnswers ? "ON" : "OFF"}</strong>
+              </span>
+              <span className={styles.controlSummaryChip}>
+                Timer:{" "}
+                <strong>
+                  {answerTimerSec > 0 ? `${answerTimerSec}s` : "No timer"}
+                </strong>
+              </span>
+              <span
+                className={styles.liveAnswerState}
+                data-open={answersOpen ? "true" : "false"}
+              >
+                {answersOpen
+                  ? `Open${Number.isFinite(answerRemainingSec) ? ` · ${formatRemaining(answerRemainingSec)} left` : ""}`
+                  : "Closed"}
+              </span>
+            </div>
+
+            <span className={styles.controlDividerCompact} />
+
+            <div className={styles.controlGroupCompact}>
+              <span className={styles.controlGroupLabel}>Danger</span>
+              <button
+                className={`${styles.btnDanger} ${styles.controlBtnCompact}`}
+                disabled={actionLoading}
+                onClick={() => {
+                  if (confirm("Finish event?")) doAction(adminFinish, "Finish");
+                }}
+              >
+                End Event
+              </button>
+            </div>
+          </>
+        )}
+
+        {isFinished && (
+          <div className={styles.controlGroupCompact}>
+            <span className={styles.controlGroupLabel}>Finished</span>
             <button
-              className={styles.btnSecondary}
+              className={`${styles.btnSecondary} ${styles.controlBtnCompact}`}
               disabled={actionLoading}
               onClick={() => doAction(adminReopen, "Move to waiting")}
             >
               Move to Waiting
             </button>
-            <span className={styles.hint}>Event finished.</span>
-          </>
+            <span className={styles.controlHintCompact}>Event finished.</span>
+          </div>
         )}
       </div>
 

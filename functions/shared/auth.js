@@ -26,9 +26,16 @@ function verifyAdminToken(authHeader) {
 
 // Hono middleware — verifies JWT and sets adminPayload on context
 async function adminAuth(c, next) {
-  const payload = verifyAdminToken(c.req.header('Authorization'));
-  c.set('adminPayload', payload);
-  await next();
+  try {
+    const payload = verifyAdminToken(c.req.header('Authorization'));
+    c.set('adminPayload', payload);
+    await next();
+  } catch (err) {
+    return c.json(
+      { error: err.message || 'Unauthorized' },
+      err.statusCode || 401,
+    );
+  }
 }
 
 module.exports = { signAdminToken, verifyAdminToken, adminAuth };

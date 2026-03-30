@@ -81,6 +81,45 @@
   line-height: 1.7;
 }
 
+.storyCollapsed {
+  font-size: 0.9rem;
+  color: #9a9ab7;
+  background: #141420;
+  border: 1px dashed #35354d;
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+}
+
+.answerStateRow {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.answerStateBadge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid #4d4d63;
+  color: #b6b6ca;
+  background: #141420;
+}
+
+.answerStateBadge[data-open="true"] {
+  color: #8effbf;
+  border-color: #2f7f51;
+  background: #13251a;
+}
+
+.answerTimer {
+  font-size: 0.8rem;
+  color: #b6a9ff;
+}
+
 .storyCounter {
   font-size: 0.8rem;
   color: #666;

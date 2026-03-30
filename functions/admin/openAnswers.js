@@ -4,32 +4,32 @@ const { requireFields } = require('../shared/validate');
 
 const TABLE = process.env.TABLE_NAME;
 
-module.exports = async function reopenEvent(c) {
+module.exports = async function openAnswers(c) {
   const body = await c.req.json();
   requireFields(body, ['eventId']);
   const { eventId } = body;
+
+  const now = new Date().toISOString();
 
   try {
     await db.send(new UpdateCommand({
       TableName: TABLE,
       Key: { PK: `EVENT#${eventId}`, SK: 'META' },
-      UpdateExpression: 'SET #s = :waiting, currentStoryIndex = :initial, answersOpen = :closed, answersOpenedAt = :none REMOVE finishedAt',
-      ConditionExpression: 'attribute_exists(PK) AND #s = :finished',
+      UpdateExpression: 'SET answersOpen = :open, answersOpenedAt = :now',
+      ConditionExpression: 'attribute_exists(PK) AND #s = :active',
       ExpressionAttributeNames: { '#s': 'status' },
       ExpressionAttributeValues: {
-        ':waiting': 'waiting',
-        ':finished': 'finished',
-        ':initial': -1,
-        ':closed': false,
-        ':none': null,
+        ':open': true,
+        ':now': now,
+        ':active': 'active',
       },
     }));
   } catch (err) {
     if (err.name === 'ConditionalCheckFailedException') {
-      throw { statusCode: 400, message: 'Event not found or not finished' };
+      throw { statusCode: 400, message: 'Event not found or not active' };
     }
     throw err;
   }
 
-  return c.json({ ok: true, status: 'waiting', currentStoryIndex: -1 });
+  return c.json({ ok: true, answersOpen: true, answersOpenedAt: now });
 };

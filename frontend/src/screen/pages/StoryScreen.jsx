@@ -17,6 +17,8 @@ export default function StoryScreen({ liveState }) {
     totalVotes = 0,
     currentStoryIndex,
     totalStories,
+    answersOpen,
+    answerRemainingSec,
   } = liveState;
   const groups = story?.optionGroups || [];
 
@@ -33,8 +35,17 @@ export default function StoryScreen({ liveState }) {
       <section className={styles.storyIntro}>
         <h1 className={styles.storyTitle}>{story?.title}</h1>
         <p className={styles.storyBody}>{story?.story}</p>
+        <div className={styles.answerStateRow}>
+          <span className={styles.answerStateBadge} data-open={answersOpen ? 'true' : 'false'}>
+            {answersOpen ? 'Answers Open' : 'Answers Closed'}
+          </span>
+          {answersOpen && Number.isFinite(answerRemainingSec) && (
+            <span className={styles.answerTimer}>Time left: {Math.max(0, Math.floor(answerRemainingSec))}s</span>
+          )}
+        </div>
       </section>
 
+      {answersOpen ? (
       <div className={styles.barsContainer}>
         {groups.map((group, gi) => (
           <div key={group.id} className={styles.barGroup}>
@@ -51,6 +62,9 @@ export default function StoryScreen({ liveState }) {
           </div>
         ))}
       </div>
+      ) : (
+        <div className={styles.storyLockedNote}>Host is presenting the story. Answers will appear when opened.</div>
+      )}
     </div>
   );
 }

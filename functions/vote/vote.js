@@ -1,6 +1,7 @@
 const { GetCommand, PutCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const db = require('../shared/db');
 const { requireFields } = require('../shared/validate');
+const { deriveAnswerWindow } = require('../shared/answerWindow');
 
 const TABLE = process.env.TABLE_NAME;
 
@@ -24,6 +25,10 @@ module.exports = async function vote(c) {
 
   if (!metaResult.Item) throw { statusCode: 404, message: 'Event not found' };
   if (metaResult.Item.status !== 'active') throw { statusCode: 400, message: 'Event is not active' };
+  const answerWindow = deriveAnswerWindow(metaResult.Item);
+  if (!answerWindow.answersOpen) {
+    throw { statusCode: 400, message: 'Answers are closed for this story' };
+  }
   if (Number(metaResult.Item.currentStoryIndex) !== storyIndex) {
     throw { statusCode: 400, message: 'Story index mismatch — event has moved to a different story' };
   }

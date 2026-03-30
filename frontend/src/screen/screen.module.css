@@ -131,6 +131,46 @@
     "Noto Sans Myanmar", "Myanmar Text", "Padauk", system-ui, sans-serif;
 }
 
+.answerStateRow {
+  margin-top: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.answerStateBadge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 0.28rem 0.6rem;
+  border: 1px solid #4d4d63;
+  color: #b5b5c8;
+  background: #141420;
+}
+
+.answerStateBadge[data-open="true"] {
+  color: #7effb3;
+  border-color: #2e7d4f;
+  background: #112218;
+}
+
+.answerTimer {
+  font-size: 0.78rem;
+  color: #9f91ff;
+}
+
+.storyLockedNote {
+  background: #141420;
+  border: 1px dashed #35354d;
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  color: #a9a8c5;
+  font-size: 0.95rem;
+}
+
 .barsContainer {
   display: flex;
   flex-direction: column;

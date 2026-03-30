@@ -11,6 +11,7 @@ const leaderboard = require('./leaderboard/leaderboard');
 
 // Admin — no auth
 const createEvent = require('./admin/createEvent');
+const createMockEventSetup = require('./admin/createMockEventSetup');
 const login = require('./admin/login');
 const listEvents = require('./admin/listEvents');
 
@@ -28,9 +29,11 @@ const start = require('./admin/start');
 const next = require('./admin/next');
 const prev = require('./admin/prev');
 const finish = require('./admin/finish');
+const openAnswers = require('./admin/openAnswers');
 const reopenEvent = require('./admin/reopenEvent');
 const duplicateEventSetup = require('./admin/duplicateEventSetup');
 const deleteEvent = require('./admin/deleteEvent');
+const updateLiveSettings = require('./admin/updateLiveSettings');
 
 const app = new Hono();
 
@@ -53,6 +56,7 @@ app.get('/event/:eventId/leaderboard', leaderboard);
 
 // ── Admin — no auth ─────────────────────────────────────────────────────────
 app.post('/admin/create-event', createEvent);
+app.post('/admin/create-mock-event-setup', adminAuth, createMockEventSetup);
 app.post('/admin/login', login);
 
 // ── Admin — auth required ───────────────────────────────────────────────────
@@ -70,6 +74,8 @@ app.post('/admin/start', adminAuth, start);
 app.post('/admin/next', adminAuth, next);
 app.post('/admin/prev', adminAuth, prev);
 app.post('/admin/finish', adminAuth, finish);
+app.post('/admin/open-answers', adminAuth, openAnswers);
+app.put('/admin/update-live-settings', adminAuth, updateLiveSettings);
 app.post('/admin/reopen', adminAuth, reopenEvent);
 app.post('/admin/duplicate-event-setup', adminAuth, duplicateEventSetup);
 app.delete('/admin/delete-event', adminAuth, deleteEvent);

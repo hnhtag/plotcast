@@ -1,5 +1,6 @@
 const { GetCommand } = require('@aws-sdk/lib-dynamodb');
 const db = require('../shared/db');
+const { deriveAnswerWindow } = require('../shared/answerWindow');
 
 const TABLE = process.env.TABLE_NAME;
 
@@ -13,11 +14,18 @@ module.exports = async function getState(c) {
   if (!metaResult.Item) throw { statusCode: 404, message: 'Event not found' };
 
   const meta = metaResult.Item;
+  const answerWindow = deriveAnswerWindow(meta);
   const response = {
     status: meta.status,
     currentStoryIndex: meta.currentStoryIndex,
     totalStories: meta.totalStories,
     title: meta.title,
+    autoShowAnswers: answerWindow.autoShowAnswers,
+    answerTimerSec: answerWindow.answerTimerSec,
+    answersOpen: answerWindow.answersOpen,
+    answersOpenedAt: answerWindow.answersOpenedAt,
+    answerEndsAt: answerWindow.answerEndsAt,
+    answerRemainingSec: answerWindow.answerRemainingSec,
   };
 
   if (meta.status === 'active' && meta.currentStoryIndex >= 0) {

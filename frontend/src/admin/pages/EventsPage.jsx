@@ -1,7 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdmin } from '../AdminContext.jsx';
-import { adminListEvents, adminReopen, adminDuplicateEventSetup, adminDeleteEvent, adminUpdateEventTitle } from '../../services/api.js';
+import {
+  adminListEvents,
+  adminReopen,
+  adminDuplicateEventSetup,
+  adminDeleteEvent,
+  adminUpdateEventTitle,
+  adminCreateMockEventSetup,
+} from '../../services/api.js';
 import { removeEventFromHistory, updateEventTitle as saveEventTitleToHistory } from '../../utils/eventHistory.js';
 import styles from '../admin.module.css';
 
@@ -14,6 +21,7 @@ export default function EventsPage() {
   const [nextCursor, setNextCursor] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [seedingMock, setSeedingMock] = useState(false);
   const [actionEventId, setActionEventId] = useState('');
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
@@ -161,6 +169,21 @@ export default function EventsPage() {
     }
   }
 
+  async function handleCreateMockEvent() {
+    setSeedingMock(true);
+    setSuccess('');
+    setError('');
+    try {
+      const res = await adminCreateMockEventSetup();
+      await fetchEvents();
+      setSuccess(`Created mock event ${res.data.eventId} with funny stories and characters`);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to create mock event setup');
+    } finally {
+      setSeedingMock(false);
+    }
+  }
+
   if (!token) {
     return (
       <div className={styles.page}>
@@ -176,7 +199,12 @@ export default function EventsPage() {
     <div className={styles.page}>
       <div className={styles.pageHeader}>
         <h1 className={styles.heading}>Events</h1>
-        <button className={styles.btnPrimary} onClick={() => navigate('/admin/setup')}>+ New Event</button>
+        <div className={styles.btnGroup} style={{ marginTop: 0 }}>
+          <button className={styles.btnSecondary} onClick={handleCreateMockEvent} disabled={seedingMock}>
+            {seedingMock ? 'Seeding Mock…' : 'Create Mock Event + Setup'}
+          </button>
+          <button className={styles.btnPrimary} onClick={() => navigate('/admin/setup')}>+ New Event</button>
+        </div>
       </div>
 
       {loading && <p className={styles.muted}>Loading…</p>}

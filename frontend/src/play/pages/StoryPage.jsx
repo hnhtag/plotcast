@@ -24,6 +24,7 @@ export default function StoryPage() {
   const [selectedOption, setSelectedOption] = useState(null); // { groupId, optionId }
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [timerLeftSec, setTimerLeftSec] = useState(null);
 
   useEffect(() => { fetchState(); }, []);
 
@@ -83,6 +84,22 @@ export default function StoryPage() {
 
   useInterval(poll, !hasVoted ? 3000 : null);
 
+  useInterval(() => {
+    setTimerLeftSec((prev) => {
+      if (!Number.isFinite(prev)) return prev;
+      return Math.max(0, prev - 1);
+    });
+  }, Number.isFinite(timerLeftSec) && timerLeftSec > 0 ? 1000 : null);
+
+  useEffect(() => {
+    const remaining = state?.answerRemainingSec;
+    if (Number.isFinite(remaining)) {
+      setTimerLeftSec(Math.max(0, Math.floor(remaining)));
+    } else {
+      setTimerLeftSec(null);
+    }
+  }, [state?.answerRemainingSec]);
+
   async function handleVote() {
     if (!selectedOption || submitting) return;
     setSubmitting(true);
@@ -113,6 +130,9 @@ export default function StoryPage() {
   if (!state?.story) return <div className={styles.page}><p className={styles.hint}>Loading story…</p></div>;
 
   const story = state.story;
+  const answersOpenByState = Boolean(state.answersOpen);
+  const timedOpen = Number.isFinite(timerLeftSec) ? timerLeftSec > 0 : true;
+  const answersOpen = answersOpenByState && timedOpen;
   // Simple max score: just show current score since we may not have all stories loaded
   const maxScore = state.totalStories * 30; // rough estimate; fine for MVP
 
@@ -126,7 +146,16 @@ export default function StoryPage() {
       <h2 className={styles.storyTitle}>{story.title}</h2>
       <p className={styles.storyBody}>{story.story}</p>
 
-      {(story.optionGroups || []).map(group => (
+      <div className={styles.answerStateRow}>
+        <span className={styles.answerStateBadge} data-open={answersOpen ? 'true' : 'false'}>
+          {answersOpen ? 'Answer Open' : 'Answer Closed'}
+        </span>
+        {answersOpen && Number.isFinite(timerLeftSec) && (
+          <span className={styles.answerTimer}>Time left: {timerLeftSec}s</span>
+        )}
+      </div>
+
+      {answersOpen ? (story.optionGroups || []).map(group => (
         <div key={group.id} className={styles.optionGroup}>
           <p className={styles.groupLabel}>{group.title}</p>
           <div className={styles.optionGrid}>
@@ -142,17 +171,19 @@ export default function StoryPage() {
             ))}
           </div>
         </div>
-      ))}
+      )) : (
+        <p className={styles.hint}>Host is presenting the story. Answers will appear when opened.</p>
+      )}
 
       {error && <p className={styles.error}>{error}</p>}
 
       {!hasVoted && (
         <button
           className={styles.btnPrimary}
-          disabled={!selectedOption || submitting}
+          disabled={!selectedOption || submitting || !answersOpen}
           onClick={handleVote}
         >
-          {submitting ? 'Submitting…' : 'Submit Answer'}
+          {submitting ? 'Submitting…' : answersOpen ? 'Submit Answer' : 'Waiting for answer phase'}
         </button>
       )}
     </div>

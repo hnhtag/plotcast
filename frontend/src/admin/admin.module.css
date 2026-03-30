@@ -65,6 +65,15 @@
   margin-top: 1rem;
 }
 
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0.65rem 0 0.25rem;
+  font-size: 0.9rem;
+  color: #d7d7ea;
+}
+
 .hint {
   font-size: 0.8rem;
   color: #666;

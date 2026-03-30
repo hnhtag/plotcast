@@ -1,5 +1,6 @@
 const { GetCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
 const db = require('../shared/db');
+const { deriveAnswerWindow } = require('../shared/answerWindow');
 
 const TABLE = process.env.TABLE_NAME;
 const CHARACTER_CACHE_TTL_MS = Number(process.env.CHARACTER_CACHE_TTL_MS || 30000);
@@ -128,6 +129,7 @@ module.exports = async function getPlayerState(c) {
   if (!metaResult.Item) throw { statusCode: 404, message: 'Event not found' };
 
   const meta = metaResult.Item;
+  const answerWindow = deriveAnswerWindow(meta);
   const user = userResult.Item || null;
   let characters = [];
   if (user) {
@@ -161,6 +163,12 @@ module.exports = async function getPlayerState(c) {
     nickname: user?.nickname || '',
     totalScore,
     rank,
+    autoShowAnswers: answerWindow.autoShowAnswers,
+    answerTimerSec: answerWindow.answerTimerSec,
+    answersOpen: answerWindow.answersOpen,
+    answersOpenedAt: answerWindow.answersOpenedAt,
+    answerEndsAt: answerWindow.answerEndsAt,
+    answerRemainingSec: answerWindow.answerRemainingSec,
     currentCharacter: toPublicCharacter(currentCharacter),
     motivation: buildMotivation(totalScore, currentCharacter),
     hasVotedCurrentStory: false,

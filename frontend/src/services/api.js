@@ -13,6 +13,7 @@ api.interceptors.request.use((config) => {
 
 // ─── Admin ────────────────────────────────────────────────────────────────────
 export const adminCreateEvent = (data) => api.post('/admin/create-event', data);
+export const adminCreateMockEventSetup = () => api.post('/admin/create-mock-event-setup');
 export const adminLogin = (data) => api.post('/admin/login', data);
 export const adminChangePassword = (data) => api.post('/admin/change-password', data);
 export const adminListEvents = ({ limit = 20, cursor } = {}) =>
@@ -32,6 +33,8 @@ export const adminStart = (eventId) => api.post('/admin/start', { eventId });
 export const adminNext = (eventId) => api.post('/admin/next', { eventId });
 export const adminPrev = (eventId) => api.post('/admin/prev', { eventId });
 export const adminFinish = (eventId) => api.post('/admin/finish', { eventId });
+export const adminOpenAnswers = (eventId) => api.post('/admin/open-answers', { eventId });
+export const adminUpdateLiveSettings = (data) => api.put('/admin/update-live-settings', data);
 export const adminReopen = (eventId) => api.post('/admin/reopen', { eventId });
 export const adminDuplicateEventSetup = (data) => api.post('/admin/duplicate-event-setup', data);
 export const adminDeleteEvent = (data) => api.delete('/admin/delete-event', { data });

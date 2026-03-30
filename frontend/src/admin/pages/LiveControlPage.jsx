@@ -1,10 +1,28 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { adminGetEvent, getEventState, adminStart, adminNext, adminPrev, adminFinish, adminReopen } from '../../services/api.js';
+import {
+  adminGetEvent,
+  getEventState,
+  adminStart,
+  adminNext,
+  adminPrev,
+  adminFinish,
+  adminReopen,
+  adminOpenAnswers,
+  adminUpdateLiveSettings,
+} from '../../services/api.js';
 import { useAdmin } from '../AdminContext.jsx';
 import { useInterval } from '../../hooks/useInterval.js';
 import LiveVoteBar from '../components/LiveVoteBar.jsx';
 import styles from '../admin.module.css';
+
+function formatRemaining(sec) {
+  if (!Number.isFinite(sec) || sec <= 0) return '00:00';
+  const safe = Math.max(0, Math.floor(sec));
+  const m = Math.floor(safe / 60);
+  const s = safe % 60;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
 
 export default function LiveControlPage() {
   const { eventId, eventData, setEventData, liveState, setLiveState } = useAdmin();
@@ -13,6 +31,9 @@ export default function LiveControlPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
+  const [autoShowAnswers, setAutoShowAnswers] = useState(true);
+  const [answerTimerSec, setAnswerTimerSec] = useState('0');
+  const [settingsSaving, setSettingsSaving] = useState(false);
   const shareUrl = `${window.location.origin}/play?event=${eventId}`;
 
   function handleCopy() {
@@ -38,6 +59,9 @@ export default function LiveControlPage() {
       ]);
       setEventData(eventRes.data);
       setLiveState(stateRes.data);
+      const meta = eventRes.data?.meta || {};
+      setAutoShowAnswers(meta.autoShowAnswers !== false);
+      setAnswerTimerSec(String(Number.isFinite(Number(meta.answerTimerSec)) ? Number(meta.answerTimerSec) : 0));
     } catch {
       setError('Failed to load event');
     } finally {
@@ -67,6 +91,20 @@ export default function LiveControlPage() {
     }
   }
 
+  async function saveLiveSettings() {
+    setError('');
+    setSettingsSaving(true);
+    try {
+      const timer = Math.max(0, parseInt(answerTimerSec, 10) || 0);
+      await adminUpdateLiveSettings({ eventId, autoShowAnswers, answerTimerSec: timer });
+      await loadAll();
+    } catch (err) {
+      setError(err.response?.data?.error || 'Save settings failed');
+    } finally {
+      setSettingsSaving(false);
+    }
+  }
+
   if (loading) return <div className={styles.page}><p className={styles.hint}>Loading…</p></div>;
 
   const meta = eventData?.meta || {};
@@ -75,11 +113,8 @@ export default function LiveControlPage() {
   const currentStory = liveState?.story;
   const voteCounts = liveState?.voteCounts || {};
   const totalVotes = liveState?.totalVotes || 0;
-
-  // Flatten all options across groups for vote bars
-  const allOptions = (currentStory?.optionGroups || []).flatMap(g =>
-    (g.options || []).map(o => ({ ...o, groupTitle: g.title }))
-  );
+  const answersOpen = Boolean(liveState?.answersOpen);
+  const answerRemainingSec = liveState?.answerRemainingSec;
 
   return (
     <div className={styles.page}>
@@ -107,6 +142,33 @@ export default function LiveControlPage() {
 
       {error && <p className={styles.error}>{error}</p>}
 
+      <div className={styles.card}>
+        <h2 className={styles.subheading}>Answer Flow Settings</h2>
+        <label className={styles.checkboxRow}>
+          <input
+            type="checkbox"
+            checked={autoShowAnswers}
+            onChange={(e) => setAutoShowAnswers(e.target.checked)}
+          />
+          <span>Auto show answers when story starts (default flow)</span>
+        </label>
+        <label className={styles.label}>Answer Timer (seconds)</label>
+        <input
+          type="number"
+          min={0}
+          className={styles.input}
+          value={answerTimerSec}
+          onChange={(e) => setAnswerTimerSec(e.target.value)}
+          placeholder="0 = no auto-close"
+        />
+        <p className={styles.hint}>When set, answers automatically close after the timer ends.</p>
+        <div className={styles.btnGroup}>
+          <button className={styles.btnPrimary} disabled={settingsSaving} onClick={saveLiveSettings}>
+            {settingsSaving ? 'Saving…' : 'Save Answer Settings'}
+          </button>
+        </div>
+      </div>
+
       {/* Control Bar */}
       <div className={styles.controlBar}>
         {status === 'waiting' && (
@@ -119,6 +181,18 @@ export default function LiveControlPage() {
             <button className={styles.btnControl} disabled={actionLoading || currentIdx <= 0} onClick={() => doAction(adminPrev, 'Prev')}>← Prev</button>
             <span className={styles.storyCounter}>{currentIdx + 1} / {totalStories}</span>
             <button className={styles.btnControl} disabled={actionLoading || currentIdx >= totalStories - 1} onClick={() => doAction(adminNext, 'Next')}>Next →</button>
+            <button
+              className={styles.btnSecondary}
+              disabled={actionLoading || answersOpen || !currentStory}
+              onClick={() => doAction(adminOpenAnswers, 'Open answers')}
+            >
+              Open Answers
+            </button>
+            <span className={styles.hint}>
+              {answersOpen
+                ? `Answers Open${Number.isFinite(answerRemainingSec) ? ` · ${formatRemaining(answerRemainingSec)} left` : ''}`
+                : 'Answers Closed'}
+            </span>
             <button className={styles.btnDanger} disabled={actionLoading} onClick={() => { if (confirm('Finish event?')) doAction(adminFinish, 'Finish'); }}>
               ■ Finish
             </button>

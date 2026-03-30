@@ -82,8 +82,8 @@ export default function ReportPage() {
         <section className={styles.card}>
           <p className={styles.reportLabel}>Top 3</p>
           <div className={styles.reportList}>
-            {top3.map(entry => (
-              <div key={entry.rank} className={styles.reportRow}>
+            {top3.map((entry, i) => (
+              <div key={`top-${entry.rank}-${entry.nickname}-${entry.totalScore}-${i}`} className={styles.reportRow}>
                 <span className={styles.reportRank}>#{entry.rank}</span>
                 <span className={styles.reportName}>{entry.nickname}</span>
                 <span className={styles.reportScore}>{entry.totalScore} pts</span>
@@ -97,8 +97,8 @@ export default function ReportPage() {
       <section className={styles.card}>
         <p className={styles.reportLabel}>Bottom 3 (censored)</p>
         <div className={styles.reportList}>
-          {bottom3.map(entry => (
-            <div key={entry.rank} className={styles.reportRowMuted}>
+          {bottom3.map((entry, i) => (
+            <div key={`bot-${entry.rank}-${entry.nickname}-${entry.totalScore}-${i}`} className={styles.reportRowMuted}>
               <span className={styles.reportRank}>#{entry.rank}</span>
               <span className={styles.reportName}>{entry.nickname}</span>
               <span className={styles.reportScoreMuted}>???</span>

@@ -41,7 +41,7 @@ export default function HallOfFateScreen({
       <div className={styles.top3Grid}>
         {top3.map((entry, i) => (
           <div
-            key={entry.rank}
+            key={`top-${entry.rank}-${entry.nickname}-${entry.totalScore}-${i}`}
             className={styles.top3Entry}
             style={{
               opacity: visible.includes(i) ? 1 : 0,
@@ -71,7 +71,7 @@ export default function HallOfFateScreen({
         <div className={styles.middleList}>
           {middle.map((entry, i) => (
             <HallEntry
-              key={entry.rank}
+              key={`mid-${entry.rank}-${entry.nickname}-${entry.totalScore}-${i}`}
               entry={entry}
               style={{
                 opacity: visible.includes(top3.length + i) ? 1 : 0,
@@ -92,7 +92,7 @@ export default function HallOfFateScreen({
           <div className={styles.bottomList}>
             {bottom3.map((entry, i) => (
               <HallEntry
-                key={entry.rank}
+                key={`bot-${entry.rank}-${entry.nickname}-${entry.totalScore}-${i}`}
                 entry={entry}
                 style={{
                   opacity: visible.includes(top3.length + middle.length + i)
@@ -117,11 +117,14 @@ export default function HallOfFateScreen({
 
       <section className={styles.reportSection}>
         <div className={styles.avgCard}>
-          <div>
+          <div className={styles.avgHero}>
             <p className={styles.avgLabel}>Organization average score</p>
-            <p className={styles.avgValue}>{averageScore}</p>
+            <div className={styles.avgValueRow}>
+              <p className={styles.avgValue}>{averageScore}</p>
+              <span className={styles.avgUnit}>pts</span>
+            </div>
           </div>
-          <div className={styles.avgCharacter}>
+          <div className={styles.avgCharacterPill}>
             <span className={styles.avgEmoji}>
               {averageCharacter?.imageEmoji || "🎭"}
             </span>
@@ -137,31 +140,30 @@ export default function HallOfFateScreen({
             </div>
           </div>
 
-          {scoreStats && (
-            <div className={styles.statGrid}>
-              <div className={styles.statChip}>
-                <span>Median</span>
-                <strong>{scoreStats.median}</strong>
-              </div>
-              <div className={styles.statChip}>
-                <span>Std Dev</span>
-                <strong>{scoreStats.stdDev}</strong>
-              </div>
-              <div className={styles.statChip}>
-                <span>Range</span>
-                <strong>
-                  {scoreStats.min} to {scoreStats.max}
-                </strong>
-              </div>
-              <div className={styles.statChip}>
-                <span>+ / - / 0</span>
-                <strong>
-                  {scoreStats.positiveCount} / {scoreStats.negativeCount} /{" "}
-                  {scoreStats.neutralCount}
-                </strong>
+          {/* {scoreStats && (
+            <div>
+              <div className={styles.statList}>
+                <div className={styles.statItem}>
+                  <span className={styles.statKey}>Median</span>
+                  <strong className={styles.statVal}>{scoreStats.median}</strong>
+                </div>
+                <div className={styles.statItem}>
+                  <span className={styles.statKey}>Std dev</span>
+                  <strong className={styles.statVal}>{scoreStats.stdDev}</strong>
+                </div>
+                <div className={styles.statItem}>
+                  <span className={styles.statKey}>Range</span>
+                  <strong className={styles.statVal}>{scoreStats.min} to {scoreStats.max}</strong>
+                </div>
+                <div className={styles.statItem}>
+                  <span className={styles.statKey}>+ / - / 0</span>
+                  <strong className={styles.statVal}>
+                    {scoreStats.positiveCount} / {scoreStats.negativeCount} / {scoreStats.neutralCount}
+                  </strong>
+                </div>
               </div>
             </div>
-          )}
+          )} */}
         </div>
 
         <div className={styles.scatterCard}>

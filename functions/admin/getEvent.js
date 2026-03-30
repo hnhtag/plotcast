@@ -1,4 +1,4 @@
-const { QueryCommand } = require('@aws-sdk/lib-dynamodb');
+const { GetCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
 const db = require('../shared/db');
 
 const TABLE = process.env.TABLE_NAME;
@@ -6,23 +6,32 @@ const TABLE = process.env.TABLE_NAME;
 module.exports = async function getEvent(c) {
   const eventId = c.req.param('eventId');
 
-  const result = await db.send(new QueryCommand({
-    TableName: TABLE,
-    KeyConditionExpression: 'PK = :pk',
-    ExpressionAttributeValues: { ':pk': `EVENT#${eventId}` },
-  }));
+  const [metaResult, storiesResult, charactersResult] = await Promise.all([
+    db.send(new GetCommand({
+      TableName: TABLE,
+      Key: { PK: `EVENT#${eventId}`, SK: 'META' },
+    })),
+    db.send(new QueryCommand({
+      TableName: TABLE,
+      KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+      ExpressionAttributeValues: {
+        ':pk': `EVENT#${eventId}`,
+        ':sk': 'STORY#',
+      },
+    })),
+    db.send(new QueryCommand({
+      TableName: TABLE,
+      KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+      ExpressionAttributeValues: {
+        ':pk': `EVENT#${eventId}`,
+        ':sk': 'CHARACTER#',
+      },
+    })),
+  ]);
 
-  const items = result.Items || [];
-  let meta = null;
-  const stories = [];
-  const characters = [];
-
-  for (const item of items) {
-    if (item.SK === 'META') meta = item;
-    else if (item.SK === 'ADMIN') { /* skip — don't expose password hash */ }
-    else if (item.SK.startsWith('STORY#')) stories.push(item);
-    else if (item.SK.startsWith('CHARACTER#')) characters.push(item);
-  }
+  const meta = metaResult.Item || null;
+  const stories = storiesResult.Items || [];
+  const characters = charactersResult.Items || [];
 
   if (!meta) throw { statusCode: 404, message: 'Event not found' };
 

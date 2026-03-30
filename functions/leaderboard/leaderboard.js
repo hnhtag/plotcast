@@ -1,7 +1,12 @@
-const { QueryCommand } = require('@aws-sdk/lib-dynamodb');
+const { GetCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
 const db = require('../shared/db');
 
 const TABLE = process.env.TABLE_NAME;
+const CHARACTER_CACHE_TTL_MS = Number(process.env.CHARACTER_CACHE_TTL_MS || 30000);
+const FINISHED_LEADERBOARD_CACHE_TTL_MS = Number(process.env.FINISHED_LEADERBOARD_CACHE_TTL_MS || 15000);
+
+const characterCache = new Map();
+const finishedLeaderboardCache = new Map();
 
 function maskNickname(nickname) {
   if (!nickname || nickname.length <= 1) return '***';
@@ -33,6 +38,41 @@ function toPublicCharacter(character) {
     minScore: character.minScore,
     maxScore: character.maxScore,
   };
+}
+
+function getCached(map, key) {
+  const cached = map.get(key);
+  if (!cached) return null;
+  if (cached.expiresAt <= Date.now()) {
+    map.delete(key);
+    return null;
+  }
+  return cached.value;
+}
+
+function setCached(map, key, value, ttlMs) {
+  map.set(key, {
+    value,
+    expiresAt: Date.now() + ttlMs,
+  });
+}
+
+async function getCharactersForEvent(eventId) {
+  const cached = getCached(characterCache, eventId);
+  if (cached) return cached;
+
+  const charactersResult = await db.send(new QueryCommand({
+    TableName: TABLE,
+    KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+    ExpressionAttributeValues: {
+      ':pk': `EVENT#${eventId}`,
+      ':sk': 'CHARACTER#',
+    },
+  }));
+
+  const sortedCharacters = sortCharacters(charactersResult.Items || []);
+  setCached(characterCache, eventId, sortedCharacters, CHARACTER_CACHE_TTL_MS);
+  return sortedCharacters;
 }
 
 function quantile(sorted, q) {
@@ -91,26 +131,35 @@ function scoreStats(scores) {
 module.exports = async function leaderboard(c) {
   const eventId = c.req.param('eventId');
 
-  const result = await db.send(new QueryCommand({
+  const metaResult = await db.send(new GetCommand({
     TableName: TABLE,
-    KeyConditionExpression: 'PK = :pk',
-    ExpressionAttributeValues: { ':pk': `EVENT#${eventId}` },
+    Key: { PK: `EVENT#${eventId}`, SK: 'META' },
   }));
 
-  const items = result.Items || [];
-  const users = [];
-  const characters = [];
-  let meta = null;
-
-  for (const item of items) {
-    if (item.SK === 'META') meta = item;
-    else if (item.SK.startsWith('USER#')) users.push(item);
-    else if (item.SK.startsWith('CHARACTER#')) characters.push(item);
-  }
+  const meta = metaResult.Item || null;
 
   if (!meta) throw { statusCode: 404, message: 'Event not found' };
 
-  const sortedCharacters = sortCharacters(characters);
+  if (meta.status === 'finished') {
+    const finishedCached = getCached(finishedLeaderboardCache, eventId);
+    if (finishedCached) return c.json(finishedCached);
+  } else {
+    finishedLeaderboardCache.delete(eventId);
+  }
+
+  const [usersResult, sortedCharacters] = await Promise.all([
+    db.send(new QueryCommand({
+      TableName: TABLE,
+      KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+      ExpressionAttributeValues: {
+        ':pk': `EVENT#${eventId}`,
+        ':sk': 'USER#',
+      },
+    })),
+    getCharactersForEvent(eventId),
+  ]);
+
+  const users = usersResult.Items || [];
 
   const usersByParticipantIndex = [...users].sort((a, b) => {
     const an = String(a.nickname || '').toLowerCase();
@@ -133,6 +182,11 @@ module.exports = async function leaderboard(c) {
     const at = new Date(a.joinedAt || 0).getTime();
     const bt = new Date(b.joinedAt || 0).getTime();
     if (at !== bt) return at - bt;
+
+    const an = String(a.nickname || '').toLowerCase();
+    const bn = String(b.nickname || '').toLowerCase();
+    const nameDiff = an.localeCompare(bn);
+    if (nameDiff !== 0) return nameDiff;
 
     return String(a.userId || a.SK).localeCompare(String(b.userId || b.SK));
   });
@@ -181,7 +235,7 @@ module.exports = async function leaderboard(c) {
     };
   });
 
-  return c.json({
+  const payload = {
     leaderboard: leaderboardData,
     totalParticipants: total,
     averageScore: Number(averageScore.toFixed(2)),
@@ -189,5 +243,11 @@ module.exports = async function leaderboard(c) {
     sortedCharacters: sortedCharacters.map(toPublicCharacter),
     scoreStats: stats,
     scorePoints,
-  });
+  };
+
+  if (meta.status === 'finished') {
+    setCached(finishedLeaderboardCache, eventId, payload, FINISHED_LEADERBOARD_CACHE_TTL_MS);
+  }
+
+  return c.json(payload);
 };

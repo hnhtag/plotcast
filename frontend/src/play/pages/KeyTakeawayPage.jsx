@@ -64,7 +64,7 @@ export default function KeyTakeawayPage() {
     <div className={styles.page}>
       <div className={styles.takeawayCard}>
         <div className={styles.scoreAward}>
-          +{lastVoteResult?.scoreAwarded ?? 0} pts
+          {lastVoteResult?.scoreAwarded ?? 0} pts
         </div>
         <ScoreMeter current={totalScore} max={maxScore} />
         <CharacterReveal character={currentCharacter} />

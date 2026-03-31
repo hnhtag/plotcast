@@ -76,6 +76,7 @@ function buildMockCharacters() {
     {
       name: 'Chaos Intern',
       description: 'You bring energy, surprise, and occasional accidental outages. High potential, needs guardrails.',
+      encouragement: 'Rough rounds are not the ending. Use this as a stepping stone and make the next call with more intent.',
       imageEmoji: '🤹',
       minScore: -999,
       maxScore: 5,
@@ -83,6 +84,7 @@ function buildMockCharacters() {
     {
       name: 'Deadline Ninja',
       description: 'You move fast, keep things alive, and somehow still reply with bullet points.',
+      encouragement: 'You already have momentum. Keep refining the small decisions and the next jump gets easier.',
       imageEmoji: '🥷',
       minScore: 6,
       maxScore: 24,
@@ -90,6 +92,7 @@ function buildMockCharacters() {
     {
       name: 'Meeting Alchemist',
       description: 'You turn confusing conversations into crisp plans and clear accountability.',
+      encouragement: 'You are building real signal. Stay consistent and keep turning ambiguity into progress.',
       imageEmoji: '🧪',
       minScore: 25,
       maxScore: 39,
@@ -97,6 +100,7 @@ function buildMockCharacters() {
     {
       name: 'Firefighter Supreme',
       description: 'You stay calm in incident storms and lead with structure under pressure.',
+      encouragement: 'Strong base. Keep trusting the process and you will convert pressure into even bigger wins.',
       imageEmoji: '🚒',
       minScore: 40,
       maxScore: 54,
@@ -104,6 +108,7 @@ function buildMockCharacters() {
     {
       name: 'Legendary Ops Wizard',
       description: 'You align teams, ship outcomes, and leave systems better than you found them.',
+      encouragement: 'You are setting the bar. Keep stretching the team and turn this finish into your new floor.',
       imageEmoji: '🧙',
       minScore: 55,
       maxScore: 999,
@@ -169,6 +174,7 @@ module.exports = async function createMockEventSetup(c) {
         characterId,
         name: character.name,
         description: character.description,
+        encouragement: character.encouragement || '',
         imageEmoji: character.imageEmoji,
         minScore: character.minScore,
         maxScore: character.maxScore,

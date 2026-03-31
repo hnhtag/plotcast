@@ -42,6 +42,15 @@ module.exports = async function vote(c) {
   if (!option) throw { statusCode: 400, message: 'Invalid selectedOptionId for this group' };
 
   const scoreAwarded = typeof option.score === 'number' ? option.score : 0;
+  const now = new Date();
+  const submittedAt = now.toISOString();
+  const openedTs = metaResult.Item?.answersOpenedAt
+    ? new Date(metaResult.Item.answersOpenedAt).getTime()
+    : NaN;
+  const submittedTs = now.getTime();
+  const responseTimeMs = Number.isFinite(openedTs)
+    ? Math.max(0, submittedTs - openedTs)
+    : 0;
 
   // Conditional PutItem prevents duplicate votes
   try {
@@ -50,7 +59,8 @@ module.exports = async function vote(c) {
       Item: {
         PK: `EVENT#${eventId}`, SK: `ANSWER#${userId}#${storyIndex}`,
         userId, storyIndex, groupId, selectedOptionId, scoreAwarded,
-        submittedAt: new Date().toISOString(),
+        submittedAt,
+        responseTimeMs,
       },
       ConditionExpression: 'attribute_not_exists(PK)',
     }));
@@ -72,8 +82,12 @@ module.exports = async function vote(c) {
   const userResult = await db.send(new UpdateCommand({
     TableName: TABLE,
     Key: { PK: `EVENT#${eventId}`, SK: `USER#${userId}` },
-    UpdateExpression: 'ADD totalScore :score',
-    ExpressionAttributeValues: { ':score': scoreAwarded },
+    UpdateExpression: 'ADD totalScore :score, totalResponseTimeMs :responseTimeMs, answeredCount :one',
+    ExpressionAttributeValues: {
+      ':score': scoreAwarded,
+      ':responseTimeMs': responseTimeMs,
+      ':one': 1,
+    },
     ReturnValues: 'UPDATED_NEW',
   }));
 

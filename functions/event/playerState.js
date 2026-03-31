@@ -1,6 +1,7 @@
 const { GetCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
 const db = require('../shared/db');
 const { deriveAnswerWindow } = require('../shared/answerWindow');
+const { sortUsersForRanking, getRankKey } = require('../shared/ranking');
 
 const TABLE = process.env.TABLE_NAME;
 const CHARACTER_CACHE_TTL_MS = Number(process.env.CHARACTER_CACHE_TTL_MS || 30000);
@@ -27,11 +28,15 @@ function toPublicCharacter(character) {
   return {
     name: character.name,
     description: character.description,
+    encouragement: character.encouragement,
     imageEmoji: character.imageEmoji,
   };
 }
 
 function buildMotivation(totalScore, character) {
+  if (character?.encouragement) {
+    return character.encouragement;
+  }
   if (character?.name) {
     return `You are tracking toward ${character.name}. Keep going, your next choice can shift your destiny.`;
   }
@@ -79,44 +84,6 @@ async function getCharactersForEvent(eventId) {
   return characters;
 }
 
-function sortUsersForRank(users) {
-  return [...users].sort((a, b) => {
-    const scoreDiff = (b.totalScore || 0) - (a.totalScore || 0);
-    if (scoreDiff !== 0) return scoreDiff;
-
-    const at = new Date(a.joinedAt || 0).getTime();
-    const bt = new Date(b.joinedAt || 0).getTime();
-    if (at !== bt) return at - bt;
-
-    const an = String(a.nickname || '').toLowerCase();
-    const bn = String(b.nickname || '').toLowerCase();
-    const nameDiff = an.localeCompare(bn);
-    if (nameDiff !== 0) return nameDiff;
-
-    return String(a.userId || a.SK).localeCompare(String(b.userId || b.SK));
-  });
-}
-
-function calculateRank(users, userId) {
-  if (!userId || !users.length) return null;
-
-  let previousScore = null;
-  let previousRank = 0;
-
-  for (let i = 0; i < users.length; i += 1) {
-    const score = users[i].totalScore || 0;
-    const rank = previousScore === score ? previousRank : i + 1;
-    previousScore = score;
-    previousRank = rank;
-
-    if ((users[i].userId || '').toString() === userId.toString()) {
-      return rank;
-    }
-  }
-
-  return null;
-}
-
 module.exports = async function getPlayerState(c) {
   const eventId = c.req.param('eventId');
   const userId = c.req.param('userId');
@@ -139,17 +106,31 @@ module.exports = async function getPlayerState(c) {
   const currentCharacter = assignCharacter(totalScore, characters);
 
   let rank = null;
-  if (user && meta.status === 'finished') {
-    const usersResult = await db.send(new QueryCommand({
+  const isFinished = meta.status === 'finished';
+  if (isFinished && user) {
+    const allUsersResp = await db.send(new QueryCommand({
       TableName: TABLE,
-      KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+      KeyConditionExpression: 'PK = :pk AND begins_with(SK, :u)',
       ExpressionAttributeValues: {
         ':pk': `EVENT#${eventId}`,
-        ':sk': 'USER#',
+        ':u': 'USER#',
       },
     }));
-    const rankedUsers = sortUsersForRank(usersResult.Items || []);
-    rank = calculateRank(rankedUsers, userId);
+
+    const users = sortUsersForRanking(allUsersResp.Items || []);
+    const idx = users.findIndex(u => (u.userId || u.SK?.replace('USER#', '')) === userId);
+
+    if (idx >= 0) {
+      const myRankKey = getRankKey(users[idx]);
+      rank = idx + 1;
+      for (let i = idx - 1; i >= 0; i -= 1) {
+        if (getRankKey(users[i]) === myRankKey) {
+          rank = i + 1;
+        } else {
+          break;
+        }
+      }
+    }
   }
 
   const response = {

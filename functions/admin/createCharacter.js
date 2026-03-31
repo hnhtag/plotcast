@@ -8,7 +8,7 @@ const TABLE = process.env.TABLE_NAME;
 module.exports = async function createCharacter(c) {
   const body = await c.req.json();
   requireFields(body, ['eventId', 'name', 'description', 'minScore', 'maxScore']);
-  const { eventId, name, description, imageEmoji, minScore, maxScore } = body;
+  const { eventId, name, description, encouragement, imageEmoji, minScore, maxScore } = body;
 
   if (typeof minScore !== 'number' || typeof maxScore !== 'number') {
     throw { statusCode: 400, message: 'minScore and maxScore must be numbers' };
@@ -20,7 +20,13 @@ module.exports = async function createCharacter(c) {
     TableName: TABLE,
     Item: {
       PK: `EVENT#${eventId}`, SK: `CHARACTER#${characterId}`,
-      characterId, name, description, imageEmoji: imageEmoji || '🎭', minScore, maxScore,
+      characterId,
+      name,
+      description,
+      encouragement: encouragement || '',
+      imageEmoji: imageEmoji || '🎭',
+      minScore,
+      maxScore,
       createdAt: new Date().toISOString(),
     },
   }));

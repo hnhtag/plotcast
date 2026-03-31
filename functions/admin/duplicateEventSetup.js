@@ -90,6 +90,7 @@ module.exports = async function duplicateEventSetup(c) {
         characterId: character.characterId,
         name: character.name,
         description: character.description,
+        encouragement: character.encouragement || '',
         imageEmoji: character.imageEmoji || '🎭',
         minScore: character.minScore,
         maxScore: character.maxScore,

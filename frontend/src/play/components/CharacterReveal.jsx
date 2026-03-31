@@ -16,6 +16,9 @@ export default function CharacterReveal({ character }) {
       <div className={styles.characterEmoji}>{character.imageEmoji}</div>
       <h3 className={styles.characterName}>{character.name}</h3>
       <p className={styles.characterDesc}>{character.description}</p>
+      {character.encouragement ? (
+        <p className={styles.motivationText}>{character.encouragement}</p>
+      ) : null}
     </div>
   );
 }

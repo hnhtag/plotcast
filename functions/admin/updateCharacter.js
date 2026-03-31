@@ -7,7 +7,7 @@ const TABLE = process.env.TABLE_NAME;
 module.exports = async function updateCharacter(c) {
   const body = await c.req.json();
   requireFields(body, ['eventId', 'characterId']);
-  const { eventId, characterId, name, description, imageEmoji, minScore, maxScore } = body;
+  const { eventId, characterId, name, description, encouragement, imageEmoji, minScore, maxScore } = body;
 
   const existing = await db.send(new GetCommand({
     TableName: TABLE,
@@ -21,6 +21,7 @@ module.exports = async function updateCharacter(c) {
 
   if (name !== undefined) { updates.push('#n = :n'); names['#n'] = 'name'; values[':n'] = name; }
   if (description !== undefined) { updates.push('description = :d'); values[':d'] = description; }
+  if (encouragement !== undefined) { updates.push('encouragement = :c'); values[':c'] = encouragement; }
   if (imageEmoji !== undefined) { updates.push('imageEmoji = :e'); values[':e'] = imageEmoji; }
   if (minScore !== undefined) { updates.push('minScore = :min'); values[':min'] = minScore; }
   if (maxScore !== undefined) { updates.push('maxScore = :max'); values[':max'] = maxScore; }

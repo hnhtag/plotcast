@@ -32,7 +32,7 @@ export default function FinishedPage() {
         <h1 className={styles.heading}>Event Complete!</h1>
         <p className={styles.nickname}>{nickname}</p>
         <ScoreMeter current={totalScore} max={150} />
-        {/* {myRank && <p className={styles.rankBadge}>#{myRank}</p>} */}
+        {myRank && <p className={styles.rankBadge}>#{myRank}</p>}
         {loading ? (
           <p className={styles.hint}>Loading your result…</p>
         ) : (

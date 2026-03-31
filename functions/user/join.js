@@ -24,8 +24,13 @@ module.exports = async function join(c) {
   await db.send(new UpdateCommand({
     TableName: TABLE,
     Key: { PK: `EVENT#${eventId}`, SK: `USER#${userId}` },
-    UpdateExpression: 'SET nickname = if_not_exists(nickname, :n), totalScore = if_not_exists(totalScore, :zero), joinedAt = if_not_exists(joinedAt, :now), userId = if_not_exists(userId, :uid)',
-    ExpressionAttributeValues: { ':n': nickname, ':zero': 0, ':now': new Date().toISOString(), ':uid': userId },
+    UpdateExpression: 'SET nickname = if_not_exists(nickname, :n), totalScore = if_not_exists(totalScore, :zero), totalResponseTimeMs = if_not_exists(totalResponseTimeMs, :zero), answeredCount = if_not_exists(answeredCount, :zero), joinedAt = if_not_exists(joinedAt, :now), userId = if_not_exists(userId, :uid)',
+    ExpressionAttributeValues: {
+      ':n': nickname,
+      ':zero': 0,
+      ':now': new Date().toISOString(),
+      ':uid': userId,
+    },
   }));
 
   return c.json({

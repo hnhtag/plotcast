@@ -12,6 +12,7 @@ import styles from "../admin.module.css";
 const defaultForm = {
   name: "",
   description: "",
+  encouragement: "",
   imageEmoji: "🎭",
   minScore: 0,
   maxScore: 100,
@@ -47,6 +48,7 @@ export default function CharactersPage() {
     setForm({
       name: char.name,
       description: char.description,
+      encouragement: char.encouragement || "",
       imageEmoji: char.imageEmoji,
       minScore: char.minScore,
       maxScore: char.maxScore,
@@ -183,6 +185,16 @@ export default function CharactersPage() {
             placeholder="Short character description…"
             required
           />
+          <label className={styles.label}>Encouragement</label>
+          <textarea
+            className={styles.textarea}
+            rows={2}
+            value={form.encouragement}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, encouragement: e.target.value }))
+            }
+            placeholder="Optional motivational line for this score band…"
+          />
           <div className={styles.row}>
             <div style={{ flex: 1 }}>
               <label className={styles.label}>Min Score</label>
@@ -262,6 +274,9 @@ export default function CharactersPage() {
                 </div>
               </div>
               <p className={styles.storyExcerpt}>{char.description}</p>
+              {char.encouragement ? (
+                <p className={styles.hint}>{char.encouragement}</p>
+              ) : null}
               <div className={styles.btnGroup}>
                 <button
                   className={styles.btnSecondary}

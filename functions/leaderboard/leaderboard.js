@@ -1,5 +1,6 @@
 const { GetCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
 const db = require('../shared/db');
+const { getResponseTimeForRanking, sortUsersForRanking, getRankKey } = require('../shared/ranking');
 
 const TABLE = process.env.TABLE_NAME;
 const CHARACTER_CACHE_TTL_MS = Number(process.env.CHARACTER_CACHE_TTL_MS || 30000);
@@ -34,6 +35,7 @@ function toPublicCharacter(character) {
   return {
     name: character.name,
     description: character.description,
+    encouragement: character.encouragement,
     imageEmoji: character.imageEmoji,
     minScore: character.minScore,
     maxScore: character.maxScore,
@@ -175,35 +177,22 @@ module.exports = async function leaderboard(c) {
     participantIndexMap.set(key, idx + 1);
   });
 
-  users.sort((a, b) => {
-    const scoreDiff = (b.totalScore || 0) - (a.totalScore || 0);
-    if (scoreDiff !== 0) return scoreDiff;
+  const rankedUsers = sortUsersForRanking(users);
 
-    const at = new Date(a.joinedAt || 0).getTime();
-    const bt = new Date(b.joinedAt || 0).getTime();
-    if (at !== bt) return at - bt;
-
-    const an = String(a.nickname || '').toLowerCase();
-    const bn = String(b.nickname || '').toLowerCase();
-    const nameDiff = an.localeCompare(bn);
-    if (nameDiff !== 0) return nameDiff;
-
-    return String(a.userId || a.SK).localeCompare(String(b.userId || b.SK));
-  });
-
-  const total = users.length;
-  const totalScoreSum = users.reduce((sum, user) => sum + (user.totalScore || 0), 0);
+  const total = rankedUsers.length;
+  const totalScoreSum = rankedUsers.reduce((sum, user) => sum + (user.totalScore || 0), 0);
   const averageScore = total > 0 ? totalScoreSum / total : 0;
   const averageCharacter = assignCharacter(averageScore, sortedCharacters);
-  const stats = scoreStats(users.map(user => user.totalScore || 0));
+  const stats = scoreStats(rankedUsers.map(user => user.totalScore || 0));
 
-  let previousScore = null;
+  let previousRankKey = null;
   let previousRank = 0;
 
-  const leaderboardData = users.map((user, idx) => {
+  const leaderboardData = rankedUsers.map((user, idx) => {
     const score = user.totalScore || 0;
-    const rank = previousScore === score ? previousRank : idx + 1;
-    previousScore = score;
+    const rankKey = getRankKey(user);
+    const rank = previousRankKey === rankKey ? previousRank : idx + 1;
+    previousRankKey = rankKey;
     previousRank = rank;
 
     const isTop3 = rank <= 3;
@@ -214,12 +203,13 @@ module.exports = async function leaderboard(c) {
       rank,
       nickname: isTop3 ? user.nickname : isBottom3 ? maskNickname(user.nickname) : user.nickname,
       totalScore: score,
+      totalResponseTimeMs: getResponseTimeForRanking(user),
       isMasked: isBottom3 && !isTop3,
       character: toPublicCharacter(character),
     };
   });
 
-  const scorePoints = users.map((user, idx) => {
+  const scorePoints = rankedUsers.map((user, idx) => {
     const score = user.totalScore || 0;
     const rank = leaderboardData[idx]?.rank || idx + 1;
     const isTop3 = rank <= 3;
@@ -231,6 +221,7 @@ module.exports = async function leaderboard(c) {
       participantIndex: participantIndexMap.get(key) || idx + 1,
       nickname: isTop3 ? user.nickname : isBottom3 ? maskNickname(user.nickname) : user.nickname,
       totalScore: score,
+      totalResponseTimeMs: getResponseTimeForRanking(user),
       isMasked: isBottom3 && !isTop3,
     };
   });

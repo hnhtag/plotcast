@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { joinEvent, getPlayerState } from '../../services/api.js';
+import { joinEvent, getEventState, getPlayerState } from '../../services/api.js';
 import { usePlay } from '../PlayContext.jsx';
 import styles from '../play.module.css';
 
@@ -9,16 +9,70 @@ export default function JoinPage() {
     userId,
     eventId: savedEventId,
     nickname: savedNickname,
+    role: savedRole,
     joinSuccess,
     restoreSession,
   } = usePlay();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const queryEventId = searchParams.get('event') || '';
-  const [form, setForm] = useState({ eventId: queryEventId || savedEventId || '', nickname: savedNickname || '' });
+  const [form, setForm] = useState({
+    eventId: queryEventId || savedEventId || '',
+    nickname: savedNickname || '',
+    role: savedRole || '',
+  });
+  const [availableRoles, setAvailableRoles] = useState([]);
+  const [rolesLoading, setRolesLoading] = useState(Boolean(queryEventId || savedEventId));
   const [autoResuming, setAutoResuming] = useState(true);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadJoinOptions() {
+      const nextEventId = form.eventId.trim();
+
+      if (nextEventId.length < 8) {
+        if (!cancelled) {
+          setAvailableRoles([]);
+          setRolesLoading(false);
+          setForm((current) => (current.role ? { ...current, role: '' } : current));
+        }
+        return;
+      }
+
+      if (!cancelled) setRolesLoading(true);
+
+      try {
+        const res = await getEventState(nextEventId);
+        if (cancelled) return;
+
+        const nextRoles = Array.isArray(res.data?.roles) ? res.data.roles : [];
+        setAvailableRoles(nextRoles);
+        setForm((current) => {
+          if (nextRoles.length === 0) {
+            return current.role ? { ...current, role: '' } : current;
+          }
+          if (nextRoles.includes(current.role)) return current;
+          if (savedRole && nextRoles.includes(savedRole)) {
+            return { ...current, role: savedRole };
+          }
+          return { ...current, role: '' };
+        });
+      } catch {
+        if (!cancelled) {
+          setAvailableRoles([]);
+          setForm((current) => (current.role ? { ...current, role: '' } : current));
+        }
+      } finally {
+        if (!cancelled) setRolesLoading(false);
+      }
+    }
+
+    loadJoinOptions();
+    return () => { cancelled = true; };
+  }, [form.eventId, savedRole]);
 
   useEffect(() => {
     let cancelled = false;
@@ -46,6 +100,7 @@ export default function JoinPage() {
         restoreSession({
           eventId: targetEventId,
           nickname: session.nickname || targetNickname,
+          role: session.role || savedRole || '',
           totalScore: session.totalScore || 0,
           currentStoryIndex: session.currentStoryIndex,
           hasVotedCurrentStory: session.hasVotedCurrentStory,
@@ -64,7 +119,7 @@ export default function JoinPage() {
 
     tryAutoResume();
     return () => { cancelled = true; };
-  }, [queryEventId, savedEventId, savedNickname, userId, navigate, restoreSession]);
+  }, [queryEventId, savedEventId, savedNickname, savedRole, userId, navigate, restoreSession]);
 
   async function routeFromSession(eventId, fallbackNickname = '') {
     const sessionRes = await getPlayerState(eventId, userId);
@@ -73,6 +128,7 @@ export default function JoinPage() {
     restoreSession({
       eventId,
       nickname: session.nickname || fallbackNickname,
+      role: session.role || form.role || '',
       totalScore: session.totalScore || 0,
       currentStoryIndex: session.currentStoryIndex,
       hasVotedCurrentStory: session.hasVotedCurrentStory,
@@ -91,8 +147,8 @@ export default function JoinPage() {
     setError('');
     setLoading(true);
     try {
-      await joinEvent({ eventId: form.eventId, nickname: form.nickname, userId });
-      joinSuccess(form.eventId, form.nickname);
+      await joinEvent({ eventId: form.eventId, nickname: form.nickname, role: form.role, userId });
+      joinSuccess(form.eventId, form.nickname, form.role);
       await routeFromSession(form.eventId, form.nickname);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to join event');
@@ -141,6 +197,22 @@ export default function JoinPage() {
             maxLength={30}
             required
           />
+          {rolesLoading && form.eventId.trim().length >= 8 ? (
+            <p className={styles.hint}>Loading participant roles…</p>
+          ) : null}
+          {availableRoles.length > 0 ? (
+            <select
+              className={styles.input}
+              value={form.role}
+              onChange={e => setForm(f => ({ ...f, role: e.target.value }))}
+              required
+            >
+              <option value="">Select your role</option>
+              {availableRoles.map((roleOption) => (
+                <option key={roleOption} value={roleOption}>{roleOption}</option>
+              ))}
+            </select>
+          ) : null}
           {error && <p className={styles.error}>{error}</p>}
           <button className={styles.btnPrimary} type="submit" disabled={loading}>
             {loading ? 'Joining…' : 'Join'}

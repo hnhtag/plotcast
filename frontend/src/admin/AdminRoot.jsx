@@ -9,6 +9,7 @@ import StoryEditorPage from './pages/StoryEditorPage.jsx';
 import CharactersPage from './pages/CharactersPage.jsx';
 import LiveControlPage from './pages/LiveControlPage.jsx';
 import AnswerFlowSettingsPage from './pages/AnswerFlowSettingsPage.jsx';
+import ParticipantRolesPage from './pages/ParticipantRolesPage.jsx';
 import ReportPage from './pages/ReportPage.jsx';
 import AppFooter from '../components/AppFooter.jsx';
 import styles from './admin.module.css';
@@ -31,6 +32,7 @@ function AdminNav() {
         {eventId && <Link className={styles.topNavLink} to="/admin/report">Report</Link>}
         {eventId && <Link className={styles.topNavLink} to="/admin/stories">Stories</Link>}
         {eventId && <Link className={styles.topNavLink} to="/admin/characters">Characters</Link>}
+        {eventId && <Link className={styles.topNavLink} to="/admin/roles">Roles</Link>}
       </div>
       <div className={styles.topNavRight}>
         {eventId && <span className={styles.topNavEventId}>{eventId}</span>}
@@ -63,6 +65,7 @@ function AdminRoutes() {
         <Route path="stories/new" element={eventId ? <StoryEditorPage /> : <Navigate to="/admin/events" replace />} />
         <Route path="stories/edit/:storyIndex" element={eventId ? <StoryEditorPage /> : <Navigate to="/admin/events" replace />} />
         <Route path="characters" element={eventId ? <CharactersPage /> : <Navigate to="/admin/events" replace />} />
+        <Route path="roles" element={eventId ? <ParticipantRolesPage /> : <Navigate to="/admin/events" replace />} />
         <Route path="live" element={eventId ? <LiveControlPage /> : <Navigate to="/admin/events" replace />} />
         <Route path="answer-flow" element={eventId ? <AnswerFlowSettingsPage /> : <Navigate to="/admin/events" replace />} />
         <Route path="report" element={eventId ? <ReportPage /> : <Navigate to="/admin/events" replace />} />

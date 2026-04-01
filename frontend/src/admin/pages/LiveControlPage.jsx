@@ -337,6 +337,9 @@ export default function LiveControlPage() {
         <a className={styles.link} href="/admin/characters">
           Manage Characters
         </a>
+        <a className={styles.link} href="/admin/roles">
+          Manage Roles
+        </a>
         <a className={styles.link} href="/admin/report">
           View Report
         </a>

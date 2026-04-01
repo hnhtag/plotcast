@@ -51,9 +51,9 @@ export default function HallOfFateScreen({
               transition: "opacity 0.5s ease, transform 0.5s ease",
             }}
           >
-            {/* <div className={styles.top3Rank}>
-              {entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : '🥉'}
-            </div> */}
+            <div className={styles.top3Rank}>
+              {entry.rank === 1 ? "🥇" : entry.rank === 2 ? "🥈" : "🥉"}
+            </div>
             <div className={styles.top3Emoji}>
               {entry.character?.imageEmoji || "🎭"}
             </div>
@@ -179,32 +179,42 @@ export default function HallOfFateScreen({
       <section className={styles.characterBandSection}>
         <h2 className={styles.characterBandTitle}>Character Score Bands</h2>
         <p className={styles.characterBandExplain}>
-          Characters are sorted by score range from lowest to highest. A
-          participant is mapped to the first inclusive range that matches: min ≤
-          score ≤ max.
+          Aim for the highest outcome at the top. Each character below shows the
+          next step down the ladder.
         </p>
         <div className={styles.characterBandList}>
-          {sortedCharacters.map((char) => (
-            <div
-              key={`${char.name}-${char.minScore}-${char.maxScore}`}
-              className={styles.characterBandCard}
-            >
-              <div className={styles.characterBandHead}>
-                <span className={styles.characterBandEmoji}>
-                  {char.imageEmoji || "🎭"}
-                </span>
-                <div>
+          {[...sortedCharacters].reverse().map((char, idx, characters) => {
+            const isTop = idx === 0;
+            const isBottom = idx === characters.length - 1;
+            const stageNumber = idx + 1;
+
+            return (
+              <div
+                key={`${char.name}-${char.minScore}-${char.maxScore}`}
+                className={`${styles.characterBandCard} ${isTop ? styles.characterBandCardPeak : ""}`}
+              >
+                <div className={styles.characterBandRail}>
+                  <div className={styles.characterBandStep}>{stageNumber}</div>
+                  {!isBottom ? (
+                    <div className={styles.characterBandConnector} />
+                  ) : null}
+                </div>
+                <div className={styles.characterBandHero}>
+                  <span className={styles.characterBandEmoji}>
+                    {char.imageEmoji || "🎭"}
+                  </span>
+                </div>
+                <div className={styles.characterBandMeta}>
                   <p className={styles.characterBandName}>{char.name}</p>
-                  <p className={styles.characterBandRange}>
-                    {char.minScore} to {char.maxScore}
-                  </p>
+                  {char.description && (
+                    <p className={styles.characterBandDesc}>
+                      {char.description}
+                    </p>
+                  )}
                 </div>
               </div>
-              {char.description && (
-                <p className={styles.characterBandDesc}>{char.description}</p>
-              )}
-            </div>
-          ))}
+            );
+          })}
           {sortedCharacters.length === 0 && (
             <p className={styles.characterBandExplain}>
               No character bands configured for this event.

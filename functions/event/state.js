@@ -20,6 +20,7 @@ module.exports = async function getState(c) {
     currentStoryIndex: meta.currentStoryIndex,
     totalStories: meta.totalStories,
     title: meta.title,
+    roles: Array.isArray(meta.roles) ? meta.roles : [],
     autoShowAnswers: answerWindow.autoShowAnswers,
     answerTimerSec: answerWindow.answerTimerSec,
     answersOpen: answerWindow.answersOpen,

@@ -142,6 +142,7 @@ module.exports = async function getPlayerState(c) {
     totalStories: meta.totalStories,
     joined: Boolean(user),
     nickname: user?.nickname || '',
+    role: user?.role || '',
     totalScore,
     rank,
     autoShowAnswers: answerWindow.autoShowAnswers,

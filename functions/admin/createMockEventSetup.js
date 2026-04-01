@@ -5,6 +5,7 @@ const db = require('../shared/db');
 const TABLE = process.env.TABLE_NAME;
 const DEFAULT_AUTO_SHOW_ANSWERS = true;
 const DEFAULT_ANSWER_TIMER_SEC = 45;
+const DEFAULT_ROLES = ['Individual Contributor', 'Team Lead', 'Manager', 'Director'];
 
 function storyOption(text, score) {
   return { id: nanoid(8), text, score };
@@ -135,6 +136,7 @@ module.exports = async function createMockEventSetup(c) {
       status: 'waiting',
       currentStoryIndex: -1,
       totalStories: stories.length,
+      roles: DEFAULT_ROLES,
       // Seed with answer-flow defaults so mock events fully exercise timer/open behavior.
       autoShowAnswers: DEFAULT_AUTO_SHOW_ANSWERS,
       answerTimerSec: DEFAULT_ANSWER_TIMER_SEC,
@@ -189,6 +191,7 @@ module.exports = async function createMockEventSetup(c) {
     title,
     stories: stories.length,
     characters: characters.length,
+    roles: DEFAULT_ROLES,
     autoShowAnswers: DEFAULT_AUTO_SHOW_ANSWERS,
     answerTimerSec: DEFAULT_ANSWER_TIMER_SEC,
   });

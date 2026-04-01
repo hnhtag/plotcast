@@ -81,6 +81,145 @@
   line-height: 1.7;
 }
 
+.infoList {
+  width: 100%;
+  margin: 0.25rem 0 0;
+  padding-left: 1.1rem;
+  color: #c0c0d0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.characterPreviewList {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.characterJourneyIntro {
+  margin: 0 0 0.85rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: #b9b1e9;
+}
+
+.characterPreviewItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  width: 100%;
+  background: #111118;
+  border: 1px solid #2e2e40;
+  border-radius: 10px;
+  padding: 0.8rem 0.85rem;
+  text-align: left;
+  position: relative;
+  margin-bottom: 0.8rem;
+}
+
+.characterPreviewItemPeak {
+  border-color: #6e62cf;
+  background: linear-gradient(180deg, #171422 0%, #111118 100%);
+}
+
+.characterPreviewRail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 1.8rem;
+  align-self: stretch;
+}
+
+.characterPreviewStep {
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #7c6fff 0%, #5f51d9 100%);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 18px #7c6fff33;
+}
+
+.characterPreviewConnector {
+  flex: 1;
+  width: 2px;
+  margin-top: 0.35rem;
+  background: linear-gradient(180deg, #7c6fff88 0%, #2e2e40 100%);
+}
+
+.characterPreviewHero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 4rem;
+  padding-top: 0.05rem;
+}
+
+.characterPreviewEmoji {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.characterPreviewLabel {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8e84d8;
+}
+
+.characterPreviewMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.characterPreviewName {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #f0f0f5;
+}
+
+.characterPreviewDescription {
+  margin: 0;
+  font-size: 0.84rem;
+  color: #a7a7bf;
+  line-height: 1.5;
+}
+
+.characterPreviewEncouragement {
+  margin: 0.15rem 0 0;
+  font-size: 0.84rem;
+  color: #cdc3ff;
+  line-height: 1.55;
+}
+
+@media (max-width: 480px) {
+  .characterPreviewItem {
+    gap: 0.6rem;
+    padding: 0.75rem;
+  }
+
+  .characterPreviewHero {
+    min-width: 3.5rem;
+  }
+
+  .characterPreviewLabel {
+    font-size: 0.58rem;
+  }
+}
+
 .storyCollapsed {
   font-size: 0.9rem;
   color: #9a9ab7;

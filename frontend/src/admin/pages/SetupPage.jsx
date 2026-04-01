@@ -4,9 +4,17 @@ import { adminCreateEvent } from '../../services/api.js';
 import { saveEventToHistory } from '../../utils/eventHistory.js';
 import styles from '../admin.module.css';
 
+function parseRolesInput(text) {
+  return String(text || '')
+    .split(/\r?\n/)
+    .map((role) => role.trim())
+    .filter(Boolean);
+}
+
 export default function SetupPage() {
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
+  const [rolesText, setRolesText] = useState('');
   const [autoShowAnswers, setAutoShowAnswers] = useState(true);
   const [answerTimerSec, setAnswerTimerSec] = useState('0');
   const [error, setError] = useState('');
@@ -18,7 +26,8 @@ export default function SetupPage() {
     setLoading(true);
     try {
       const parsedTimer = Math.max(0, parseInt(answerTimerSec, 10) || 0);
-      const res = await adminCreateEvent({ title, autoShowAnswers, answerTimerSec: parsedTimer });
+      const roles = parseRolesInput(rolesText);
+      const res = await adminCreateEvent({ title, roles, autoShowAnswers, answerTimerSec: parsedTimer });
       const { eventId } = res.data;
       saveEventToHistory(eventId, title);
       navigate('/admin/events');
@@ -46,6 +55,16 @@ export default function SetupPage() {
             autoFocus
             required
           />
+
+          <label className={styles.label}>Participant Roles <span className={styles.hint}>(optional, one per line)</span></label>
+          <textarea
+            className={styles.textarea}
+            rows={6}
+            value={rolesText}
+            onChange={e => setRolesText(e.target.value)}
+            placeholder={['Individual Contributor', 'Team Lead', 'Manager'].join('\n')}
+          />
+          <p className={styles.hint}>Leave blank if participants should only enter a nickname.</p>
 
           <label className={styles.checkboxRow}>
             <input

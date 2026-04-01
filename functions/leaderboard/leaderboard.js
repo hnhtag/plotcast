@@ -18,6 +18,11 @@ function assignCharacter(totalScore, characters) {
   return characters.find(c => totalScore >= c.minScore && totalScore <= c.maxScore) || null;
 }
 
+function assignCharacterForAverage(totalScore, characters) {
+  const roundedScore = Math.round(Number(totalScore || 0));
+  return assignCharacter(roundedScore, characters);
+}
+
 function sortCharacters(characters) {
   return [...characters].sort((a, b) => {
     const minDiff = (a.minScore || 0) - (b.minScore || 0);
@@ -182,7 +187,7 @@ module.exports = async function leaderboard(c) {
   const total = rankedUsers.length;
   const totalScoreSum = rankedUsers.reduce((sum, user) => sum + (user.totalScore || 0), 0);
   const averageScore = total > 0 ? totalScoreSum / total : 0;
-  const averageCharacter = assignCharacter(averageScore, sortedCharacters);
+  const averageCharacter = assignCharacterForAverage(averageScore, sortedCharacters);
   const stats = scoreStats(rankedUsers.map(user => user.totalScore || 0));
 
   let previousRankKey = null;

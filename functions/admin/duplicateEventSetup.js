@@ -55,6 +55,7 @@ module.exports = async function duplicateEventSetup(c) {
       status: 'waiting',
       currentStoryIndex: -1,
       totalStories: stories.length,
+      roles: Array.isArray(sourceMeta.roles) ? sourceMeta.roles : [],
       autoShowAnswers: sourceMeta.autoShowAnswers !== false,
       answerTimerSec: Number.isFinite(Number(sourceMeta.answerTimerSec)) ? Math.max(0, Math.floor(Number(sourceMeta.answerTimerSec))) : 0,
       answersOpen: false,

@@ -1,8 +1,85 @@
 import React, { useEffect, useState } from 'react';
-import { getEventState, getLeaderboard } from '../../services/api.js';
+import * as XLSX from 'xlsx';
+import { adminGetEventExportData, getEventState, getLeaderboard } from '../../services/api.js';
 import { useAdmin } from '../AdminContext.jsx';
 import ScoreDistributionChart from '../../components/ScoreDistributionChart.jsx';
 import styles from '../admin.module.css';
+
+function formatResponseSeconds(ms) {
+  if (!Number.isFinite(Number(ms)) || Number(ms) < 0 || Number(ms) === Number.MAX_SAFE_INTEGER) return '';
+  return Number((Number(ms) / 1000).toFixed(2));
+}
+
+function sanitizeSheetName(name, fallback) {
+  const clean = String(name || fallback || 'Sheet').replace(/[\\/?*\[\]:]/g, ' ').trim();
+  return (clean || fallback || 'Sheet').slice(0, 31);
+}
+
+function downloadWorkbook(exportData) {
+  const workbook = XLSX.utils.book_new();
+
+  const storySetupRows = (exportData?.storySetup || []).map((story) => ({
+    'Story #': Number(story.storyIndex || 0) + 1,
+    'Story Title': story.storyTitle,
+    'Story Body': story.storyBody,
+    'Key Takeaway': story.keyTakeaway,
+    'Option Group': story.groupTitle,
+    'Option Text': story.optionText,
+    'Option Score': story.optionScore,
+  }));
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet(storySetupRows.length > 0 ? storySetupRows : [{ Info: 'No story setup found' }]),
+    'Story Setup',
+  );
+
+  const playerRows = (exportData?.players || []).map((player) => ({
+    Rank: player.rank,
+    Nickname: player.nickname,
+    Role: player.role,
+    'Total Score': player.totalScore,
+    Character: player.characterName,
+    'Total Answer Time (s)': formatResponseSeconds(player.totalResponseTimeMs),
+    'Answered Count': player.answeredCount,
+    'User ID': player.userId,
+  }));
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet(playerRows.length > 0 ? playerRows : [{ Info: 'No players found' }]),
+    'Players',
+  );
+
+  (exportData?.storyVotes || []).forEach((story, idx) => {
+    const storyRows = (story.votes || []).map((vote) => ({
+      Rank: vote.rank,
+      Nickname: vote.nickname,
+      Role: vote.role,
+      Character: vote.characterName,
+      'Did Vote': vote.didVote ? 'Yes' : 'No',
+      'Selected Option': vote.selectedOptionText || '',
+      'Option Group': vote.groupTitle || '',
+      'Option Score': vote.optionScore,
+      'Answer Time (s)': formatResponseSeconds(vote.responseTimeMs),
+      'Submitted At': vote.submittedAt || '',
+      'Total Score': vote.totalScore,
+      'User ID': vote.userId,
+    }));
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.json_to_sheet(storyRows.length > 0 ? storyRows : [{ Info: 'No votes recorded' }]),
+      sanitizeSheetName(`S${Number(story.storyIndex || idx) + 1} ${story.storyTitle || `Story ${idx + 1}`}`, `Story ${idx + 1}`),
+    );
+  });
+
+  const fileSafeTitle = String(exportData?.title || exportData?.eventId || 'plotcast-report')
+    .replace(/[^a-z0-9-_]+/gi, '-')
+    .replace(/^-+|-+$/g, '') || 'plotcast-report';
+
+  XLSX.writeFile(workbook, `${fileSafeTitle}-report.xlsx`);
+}
 
 export default function ReportPage() {
   const { eventId } = useAdmin();
@@ -10,6 +87,7 @@ export default function ReportPage() {
   const [error, setError] = useState('');
   const [eventState, setEventState] = useState(null);
   const [report, setReport] = useState(null);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     loadReport();
@@ -32,6 +110,19 @@ export default function ReportPage() {
     }
   }
 
+  async function handleExportExcel() {
+    setExporting(true);
+    setError('');
+    try {
+      const res = await adminGetEventExportData(eventId);
+      downloadWorkbook(res.data);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to export Excel report');
+    } finally {
+      setExporting(false);
+    }
+  }
+
   if (loading) {
     return <div className={styles.page}><p className={styles.hint}>Loading report…</p></div>;
   }
@@ -47,8 +138,13 @@ export default function ReportPage() {
           <h1 className={styles.heading}>Event Report</h1>
           <p className={styles.hint}>{eventState?.title || 'Untitled event'} · {eventId}</p>
         </div>
-        <div className={styles.statusBadge} data-status={eventState?.status || 'waiting'}>
-          {(eventState?.status || 'waiting').toUpperCase()}
+        <div className={styles.btnGroup} style={{ marginTop: 0 }}>
+          <button className={styles.btnSecondary} type="button" onClick={handleExportExcel} disabled={exporting}>
+            {exporting ? 'Exporting…' : 'Export Excel'}
+          </button>
+          <div className={styles.statusBadge} data-status={eventState?.status || 'waiting'}>
+            {(eventState?.status || 'waiting').toUpperCase()}
+          </div>
         </div>
       </div>
 

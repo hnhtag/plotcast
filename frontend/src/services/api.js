@@ -41,7 +41,9 @@ export const adminChangePassword = (data) => api.post('/admin/change-password', 
 export const adminListEvents = ({ limit = 20, cursor } = {}) =>
   api.get('/admin/events', { params: { limit, ...(cursor && { cursor }) } });
 export const adminGetEvent = (eventId) => api.get(`/admin/event/${eventId}`);
+export const adminGetEventExportData = (eventId) => api.get(`/admin/event/${eventId}/export-data`);
 export const adminUpdateEventTitle = (data) => api.put('/admin/update-event-title', data);
+export const adminUpdateParticipantRoles = (data) => api.put('/admin/update-participant-roles', data);
 
 export const adminCreateStory = (data) => api.post('/admin/create-story', data);
 export const adminUpdateStory = (data) => api.put('/admin/update-story', data);

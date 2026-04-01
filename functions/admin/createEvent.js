@@ -3,6 +3,7 @@ const { nanoid } = require('nanoid');
 const db = require('../shared/db');
 const { requireFields } = require('../shared/validate');
 const { normalizeTimerSeconds } = require('../shared/answerWindow');
+const { normalizeRoles } = require('../shared/eventRoles');
 
 const TABLE = process.env.TABLE_NAME;
 
@@ -12,6 +13,7 @@ module.exports = async function createEvent(c) {
   const { title } = body;
   const autoShowAnswers = body.autoShowAnswers !== false;
   const answerTimerSec = normalizeTimerSeconds(body.answerTimerSec);
+  const roles = normalizeRoles(body.roles);
 
   const eventId = nanoid(8);
   const createdAt = new Date().toISOString();
@@ -27,6 +29,7 @@ module.exports = async function createEvent(c) {
       status: 'waiting',
       currentStoryIndex: -1,
       totalStories: 0,
+      roles,
       autoShowAnswers,
       answerTimerSec,
       answersOpen: false,
@@ -35,5 +38,5 @@ module.exports = async function createEvent(c) {
     },
   }));
 
-  return c.json({ eventId, title });
+  return c.json({ eventId, title, roles });
 };

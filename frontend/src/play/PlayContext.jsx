@@ -15,17 +15,20 @@ function getOrCreateUserId() {
 export function PlayProvider({ children }) {
   const [userId] = useState(getOrCreateUserId);
   const [nickname, setNickname] = useState(() => localStorage.getItem('plotcast_nickname') || '');
+  const [role, setRole] = useState(() => localStorage.getItem('plotcast_role') || '');
   const [eventId, setEventId] = useState(() => localStorage.getItem('plotcast_eventId') || '');
   const [totalScore, setTotalScore] = useState(0);
   const [hasVoted, setHasVoted] = useState(false);
   const [lastVoteResult, setLastVoteResult] = useState(null); // { keyTakeaway, scoreAwarded }
   const [currentStoryIndex, setCurrentStoryIndex] = useState(-1);
 
-  function joinSuccess(newEventId, newNickname) {
+  function joinSuccess(newEventId, newNickname, newRole = '') {
     localStorage.setItem('plotcast_eventId', newEventId);
     localStorage.setItem('plotcast_nickname', newNickname);
+    localStorage.setItem('plotcast_role', newRole);
     setEventId(newEventId);
     setNickname(newNickname);
+    setRole(newRole);
   }
 
   function voteSuccess(result) {
@@ -37,12 +40,15 @@ export function PlayProvider({ children }) {
   function restoreSession(session) {
     const safeEventId = session?.eventId || '';
     const safeNickname = session?.nickname || '';
+    const safeRole = session?.role || '';
 
     if (safeEventId) localStorage.setItem('plotcast_eventId', safeEventId);
     if (safeNickname) localStorage.setItem('plotcast_nickname', safeNickname);
+    localStorage.setItem('plotcast_role', safeRole);
 
     setEventId(safeEventId);
     setNickname(safeNickname);
+    setRole(safeRole);
     setTotalScore(session?.totalScore || 0);
     setCurrentStoryIndex(
       Number.isInteger(session?.currentStoryIndex) ? session.currentStoryIndex : -1
@@ -60,7 +66,7 @@ export function PlayProvider({ children }) {
 
   return (
     <PlayContext.Provider value={{
-      userId, nickname, eventId, totalScore, hasVoted, lastVoteResult, currentStoryIndex,
+      userId, nickname, role, eventId, totalScore, hasVoted, lastVoteResult, currentStoryIndex,
       setTotalScore, joinSuccess, voteSuccess, onStoryChanged, setHasVoted, restoreSession,
     }}>
       {children}

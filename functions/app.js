@@ -35,6 +35,8 @@ const reopenEvent = require('./admin/reopenEvent');
 const duplicateEventSetup = require('./admin/duplicateEventSetup');
 const deleteEvent = require('./admin/deleteEvent');
 const updateLiveSettings = require('./admin/updateLiveSettings');
+const updateParticipantRoles = require('./admin/updateParticipantRoles');
+const exportReportData = require('./admin/exportReportData');
 
 const app = new Hono();
 
@@ -70,6 +72,7 @@ app.put('/admin/update-character', adminAuth, updateCharacter);
 app.delete('/admin/delete-character', adminAuth, deleteCharacter);
 app.get('/admin/events', adminAuth, listEvents);
 app.get('/admin/event/:eventId', adminAuth, getEvent);
+app.get('/admin/event/:eventId/export-data', adminAuth, exportReportData);
 app.put('/admin/update-event-title', adminAuth, updateEventTitle);
 app.post('/admin/start', adminAuth, start);
 app.post('/admin/next', adminAuth, next);
@@ -78,6 +81,7 @@ app.post('/admin/finish', adminAuth, finish);
 app.post('/admin/open-answers', adminAuth, openAnswers);
 app.post('/admin/close-answers', adminAuth, closeAnswers);
 app.put('/admin/update-live-settings', adminAuth, updateLiveSettings);
+app.put('/admin/update-participant-roles', adminAuth, updateParticipantRoles);
 app.post('/admin/reopen', adminAuth, reopenEvent);
 app.post('/admin/duplicate-event-setup', adminAuth, duplicateEventSetup);
 app.delete('/admin/delete-event', adminAuth, deleteEvent);

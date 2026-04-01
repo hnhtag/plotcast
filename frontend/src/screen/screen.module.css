@@ -525,26 +525,76 @@
 }
 
 .characterBandList {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .characterBandCard {
   background: #10101a;
   border: 1px solid #2a2a40;
   border-radius: 10px;
-  padding: 0.65rem;
+  padding: 0.8rem 0.85rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  text-align: left;
+  margin-bottom: 0.8rem;
 }
 
-.characterBandHead {
+.characterBandCardPeak {
+  border-color: #6e62cf;
+  background: linear-gradient(180deg, #171422 0%, #10101a 100%);
+}
+
+.characterBandRail {
+  display: flex;
+  flex-direction: column;
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  min-width: 1.8rem;
+  align-self: stretch;
+}
+
+.characterBandStep {
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #7c6fff 0%, #5f51d9 100%);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 18px #7c6fff33;
+}
+
+.characterBandConnector {
+  flex: 1;
+  width: 2px;
+  margin-top: 0.35rem;
+  background: linear-gradient(180deg, #7c6fff88 0%, #2e2e40 100%);
+}
+
+.characterBandHero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 4rem;
+  padding-top: 0.05rem;
+}
+
+.characterBandMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  flex: 1;
 }
 
 .characterBandEmoji {
-  font-size: 1.35rem;
+  font-size: 1.8rem;
   line-height: 1;
 }
 
@@ -555,17 +605,11 @@
   font-weight: 700;
 }
 
-.characterBandRange {
-  margin: 0.1rem 0 0;
-  font-size: 0.75rem;
-  color: #a6a6be;
-}
-
 .characterBandDesc {
-  margin: 0.45rem 0 0;
-  font-size: 0.74rem;
-  line-height: 1.45;
-  color: #8f8fab;
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: #a7a7bf;
 }
 
 @media (max-width: 980px) {
@@ -573,7 +617,12 @@
     grid-template-columns: 1fr;
   }
 
-  .characterBandList {
-    grid-template-columns: 1fr;
+  .characterBandCard {
+    gap: 0.6rem;
+    padding: 0.75rem;
+  }
+
+  .characterBandHero {
+    min-width: 3.5rem;
   }
 }

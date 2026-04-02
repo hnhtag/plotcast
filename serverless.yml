@@ -8,9 +8,9 @@ provider:
   region: ap-southeast-1  # change to your preferred region
   environment:
     TABLE_NAME: PlotCastTable
-    JWT_SECRET: ${env:JWT_SECRET, 'change-this-secret-before-deploy'}
+    JWT_SECRET: ${env:JWT_SECRET, 'change-this-secret-before-deploy1'}
     JWT_EXPIRY: '14400'
-    ADMIN_PASSWORD: ${env:ADMIN_PASSWORD, '12345678'}
+    ADMIN_PASSWORD: ${env:ADMIN_PASSWORD, 'hha12345678@'}
   iam:
     role:
       statements:

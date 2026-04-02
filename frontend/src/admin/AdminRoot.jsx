@@ -11,6 +11,7 @@ import LiveControlPage from './pages/LiveControlPage.jsx';
 import AnswerFlowSettingsPage from './pages/AnswerFlowSettingsPage.jsx';
 import ParticipantRolesPage from './pages/ParticipantRolesPage.jsx';
 import ReportPage from './pages/ReportPage.jsx';
+import ChangePasswordPage from './pages/ChangePasswordPage.jsx';
 import AppFooter from '../components/AppFooter.jsx';
 import styles from './admin.module.css';
 
@@ -33,6 +34,7 @@ function AdminNav() {
         {eventId && <Link className={styles.topNavLink} to="/admin/stories">Stories</Link>}
         {eventId && <Link className={styles.topNavLink} to="/admin/characters">Characters</Link>}
         {eventId && <Link className={styles.topNavLink} to="/admin/roles">Roles</Link>}
+        <Link className={styles.topNavLink} to="/admin/change-password">Change Password</Link>
       </div>
       <div className={styles.topNavRight}>
         {eventId && <span className={styles.topNavEventId}>{eventId}</span>}
@@ -69,6 +71,7 @@ function AdminRoutes() {
         <Route path="live" element={eventId ? <LiveControlPage /> : <Navigate to="/admin/events" replace />} />
         <Route path="answer-flow" element={eventId ? <AnswerFlowSettingsPage /> : <Navigate to="/admin/events" replace />} />
         <Route path="report" element={eventId ? <ReportPage /> : <Navigate to="/admin/events" replace />} />
+        <Route path="change-password" element={<ChangePasswordPage />} />
         <Route path="*" element={<Navigate to="/admin/events" replace />} />
       </Routes>
       <AppFooter />
